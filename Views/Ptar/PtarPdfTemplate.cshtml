@@ -1,0 +1,134 @@
+﻿@model IEnumerable<InternalControlApp.Models.RisksPtar>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Reporte PTAR</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 7px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #cccccc;
+            text-align: left;
+            padding: 3px;
+            word-wrap: break-word;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+
+        .align-middle {
+            vertical-align: middle;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+        }
+
+        h2, h4 {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Programa de Trabajo de Administración de Riesgos (PTAR)</h2>
+        <h4>Fecha de Generación: @DateTime.Now.ToString("dd/MM/yyyy")</h4>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th rowspan="2">No. Riesgo</th>
+                <th rowspan="2">Descripción del Riesgo</th>
+                <th rowspan="2">Clasificación</th>
+                <th rowspan="2">Grado de Impacto</th>
+                <th rowspan="2">Prob. de Ocurrencia</th>
+                <th rowspan="2">Cuadrante</th>
+                <th rowspan="2">Estrategia</th>
+                <th rowspan="2">No. Factor</th>
+                <th rowspan="2">Factor de Riesgo</th>
+                <th rowspan="2">Acción de Control</th>
+                <th rowspan="2">Unidad</th>
+                <th rowspan="2">Responsable</th>
+                <th rowspan="2">Fechas</th>
+                <th rowspan="2">Medios de Verificación</th>
+                <th colspan="2">1er Trim</th>
+                <th colspan="2">2do Trim</th>
+                <th colspan="2">3er Trim</th>
+                <th colspan="2">4to Trim</th>
+            </tr>
+            <tr>
+                <th>Enlace</th>
+                <th>Comisaria</th>
+                <th>Enlace</th>
+                <th>Comisaria</th>
+                <th>Enlace</th>
+                <th>Comisaria</th>
+                <th>Enlace</th>
+                <th>Comisaria</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var risk in Model)
+            {
+                var factors = risk.RiskFactorsPtars.ToList();
+                var rowSpanCount = factors.Any() ? factors.Count : 1;
+
+                if (factors.Any())
+                {
+                    for (int i = 0; i < factors.Count; i++)
+                    {
+                        var factor = factors[i];
+                        <tr>
+                            @if (i == 0)
+                            {
+                                <td rowspan="@rowSpanCount" class="align-middle">@risk.RiskNumber</td>
+                                <td rowspan="@rowSpanCount" class="align-middle">@risk.Description</td>
+                                <td rowspan="@rowSpanCount" class="align-middle">@risk.RiskClassification</td>
+                                <td rowspan="@rowSpanCount" class="align-middle text-center">@risk.ImpactGrade</td>
+                                <td rowspan="@rowSpanCount" class="align-middle text-center">@risk.OccurrenceProbability</td>
+                                <td rowspan="@rowSpanCount" class="align-middle text-center">@risk.Quadrant</td>
+                                <td rowspan="@rowSpanCount" class="align-middle">@risk.Strategy</td>
+                            }
+                            <td class="text-center">@factor.FactorNumber</td>
+                            <td>@factor.FactorDescription</td>
+                            <td>@factor.ControlAction</td>
+                            <td>@factor.Unit?.UnitName</td>
+                            <td>@(factor.ResponsibleUser != null ? $"{factor.ResponsibleUser.FirstName} {factor.ResponsibleUser.LastName}" : "")</td>
+                            <td>@($"Inicio: {factor.StartDate:dd/MM/yy}")<br />@($"Fin: {factor.EndDate:dd/MM/yy}")</td>
+                            <td>@factor.VerificationMeans</td>
+                            <td class="text-center">@factor.Quarter1Grade</td>
+                            <td class="text-center">@(factor.Quarter1GradeOic.HasValue ? $"{factor.Quarter1GradeOic.Value:F0}%" : "")</td>
+                            <td class="text-center">@factor.Quarter2Grade</td>
+                            <td class="text-center">@(factor.Quarter2GradeOic.HasValue ? $"{factor.Quarter2GradeOic.Value:F0}%" : "")</td>
+                            <td class="text-center">@factor.Quarter3Grade</td>
+                            <td class="text-center">@(factor.Quarter3GradeOic.HasValue ? $"{factor.Quarter3GradeOic.Value:F0}%" : "")</td>
+                            <td class="text-center">@factor.Quarter4Grade</td>
+                            <td class="text-center">@(factor.Quarter4GradeOic.HasValue ? $"{factor.Quarter4GradeOic.Value:F0}%" : "")</td>
+                        </tr>
+                    }
+                }
+            }
+        </tbody>
+    </table>
+</body>
+</html>

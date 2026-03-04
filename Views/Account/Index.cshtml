@@ -1,0 +1,103 @@
+﻿@model InternalControlApp.Models.LoginViewModel
+@{
+    Layout = null;
+    ViewData["Title"] = "Iniciar Sesión";
+}
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - Sistema de Control Interno</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Cargamos Bootstrap (necesario para el input-group) -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- *** LÍNEA AÑADIDA PARA CARGAR LOS ICONOS *** -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <!-- Enlazamos nuestra hoja de estilos externa -->
+    <link rel="stylesheet" href="~/css/login.css" asp-append-version="true" />
+</head>
+<body>
+    <header class="header-bar">
+        Sistema de Control Interno Institucional
+    </header>
+
+    <div class="login-container">
+        <h1 class="main-title">Iniciar sesión</h1>
+        <main class="login-card">
+            <form asp-action="Index" method="post">
+                <img src="~/images/logo_uttn.png">
+
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-group">
+                    <label asp-for="Email" class="form-label">Usuario:</label>
+                    <input asp-for="Email" class="form-control">
+                    <span asp-validation-for="Email" class="text-danger"></span>
+                </div>
+
+                <div class="form-group">
+                    <label asp-for="Password" class="form-label">Contraseña:</label>
+                    <div class="input-group">
+                        <input asp-for="Password" class="form-control" />
+                        <button class="btn btn-outline-secondary toggle-password" type="button" data-target="Password">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                    <span asp-validation-for="Password" class="text-danger"></span>
+                </div>
+
+                <button class="btn-submit" type="submit">Iniciar Sesión</button>
+            </form>
+        </main>
+    </div>
+
+    <footer style="text-align:center; line-height:1.6; font-size:14px;">
+
+        <!-- LÍNEA 1 -->
+        <p style="margin:4px 0;">
+            Innovación tecnológica impulsada por la
+            <a href="https://login.uttn.app/Home/Creditos" target="_blank"
+               style="color:#1ab192; text-decoration:none; font-weight:bold;">
+                Carrera de Tecnologías de la Información
+            </a>
+            y el Departamento de Sistemas
+        </p>
+
+        <!-- LÍNEA 2 -->
+        <p style="margin:4px 0;">
+            2025 | Universidad Tecnológica de Tamaulipas Norte |
+            <a href="https://www.uttn.edu.mx/aviso-de-privacidad/" target="_blank"
+               style="color:#1ab192; text-decoration:none; font-weight:bold;">
+                Aviso de Privacidad
+            </a>
+        </p>
+
+    </footer>
+
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const toggleButtons = document.querySelectorAll('.toggle-password');
+            toggleButtons.forEach(button => {
+                button.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const targetId = this.getAttribute('data-target');
+                    const input = document.getElementById(targetId);
+                    const icon = this.querySelector('i');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

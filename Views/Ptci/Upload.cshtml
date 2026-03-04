@@ -1,0 +1,413 @@
+﻿@model InternalControlApp.Models.EnlaceUploadViewModel
+@{
+    ViewData["Title"] = "Cargar Evidencia PTCI";
+}
+
+@section HeaderButtons {
+    <a class="btn" style="background-color: #00A987; color: white;" asp-action="Index">🔙Volver</a>
+}
+
+<h1 class="display-6 mb-4">Cargar Evidencia de Elemento (PTCI)</h1>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header"><h5>Elemento de Control</h5></div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3"><label class="fw-bold">NGCI</label><p class="text-muted">@Model.Ngci</p></div>
+            <div class="col-md-3"><label class="fw-bold">No. de Elemento</label><p class="text-muted">@Model.ControlNumber</p></div>
+            <div class="col-md-6"><label class="fw-bold">Descripción</label><p class="text-muted">@Model.ControlElement</p></div>
+        </div>
+    </div>
+</div>
+
+@foreach (var action in Model.Actions)
+{
+    <div class="card shadow-sm mb-4">
+        <div class="card-header bg-light">
+            <h6>Acción de Mejora: @action.ImprovementAction</h6>
+        </div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-4"><label class="fw-bold">Proceso:</label> <span class="text-muted">@action.Process</span></div>
+                <div class="col-md-4"><label class="fw-bold">Unidad Admin.:</label> <span class="text-muted">@action.UnitName</span></div>
+                <div class="col-md-4"><label class="fw-bold">Responsable:</label> <span class="text-muted">@action.ResponsibleUserName</span></div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Evidencias por Trimestre</div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        @{
+                            // --- INICIO DE LA CORRECCIÓN ---
+                            // "isFinal" ahora solo significa que la tarea está ENVIADA y bloqueada (sin incluir "Sugerencia")
+                            bool isT1Final = action.Quarter1Status == "Pendiente de Revisión" || action.Quarter1Status == "Aprobado";
+                            bool isT2Final = action.Quarter2Status == "Pendiente de Revisión" || action.Quarter2Status == "Aprobado";
+                            bool isT3Final = action.Quarter3Status == "Pendiente de Revisión" || action.Quarter3Status == "Aprobado";
+                            // --- FIN DE LA CORRECCIÓN ---
+                        }
+
+                        <div class="col-md-3 border-end p-3 d-flex flex-column justify-content-between">
+                            <h6 class="mb-3">1er Trimestre</h6>
+                            <div>
+                                @if (isT1Final)
+                                {
+                                    <div class="btn btn-success disabled w-100 mb-2" title="Esta entrega ya fue enviada y está bloqueada.">@($"{action.Quarter1Grade:F0}") % (@action.Quarter1Status)</div>
+                                }
+                                else if (action.Quarter1Status == "Borrador" || action.Quarter1Status == "Sugerencia")
+                                {
+                                    <button type="button" class="btn btn-warning w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-action-id="@action.ActionId" data-quarter="1" data-action-name="@action.ImprovementAction">@($"{action.Quarter1Grade:F0}") % (@action.Quarter1Status)</button>
+                                    <form method="post" asp-controller="Ptci" asp-action="SubmitEvidence"><input type="hidden" name="ActionId" value="@action.ActionId" /><input type="hidden" name="Quarter" value="1" /><button type="submit" class="btn btn-sm btn-outline-success w-100">Enviar Evidencia</button></form>
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-primary w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-action-id="@action.ActionId" data-quarter="1" data-action-name="@action.ImprovementAction">Subir</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 border-end p-3 d-flex flex-column justify-content-between">
+                            <h6 class="mb-3">2do Trimestre</h6>
+                            <div>
+                                @if (isT2Final)
+                                {
+                                    <div class="btn btn-success disabled w-100 mb-2">@($"{action.Quarter2Grade:F0}") % (@action.Quarter2Status)</div>
+                                }
+                                else if (isT1Final)
+                                {
+                                    if (action.Quarter2Status == "Borrador" || action.Quarter2Status == "Sugerencia")
+                                    {
+                                        <button type="button" class="btn btn-warning w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-action-id="@action.ActionId" data-quarter="2" data-action-name="@action.ImprovementAction">@($"{action.Quarter2Grade:F0}") % (@action.Quarter2Status)</button>
+                                        <form method="post" asp-controller="Ptci" asp-action="SubmitEvidence"><input type="hidden" name="ActionId" value="@action.ActionId" /><input type="hidden" name="Quarter" value="2" /><button type="submit" class="btn btn-sm btn-outline-success w-100">Enviar Evidencia</button></form>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-primary w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-action-id="@action.ActionId" data-quarter="2" data-action-name="@action.ImprovementAction">Subir</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
+                                    }
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-primary w-100 mb-2" disabled title="Debe completar y enviar el trimestre anterior">Subir</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 border-end p-3 d-flex flex-column justify-content-between">
+                            <h6 class="mb-3">3er Trimestre</h6>
+                            <div>
+                                @if (isT3Final)
+                                {
+                                    <div class="btn btn-success disabled w-100 mb-2">@($"{action.Quarter3Grade:F0}") % (@action.Quarter3Status)</div>
+                                }
+                                else if (isT2Final)
+                                {
+                                    if (action.Quarter3Status == "Borrador" || action.Quarter3Status == "Sugerencia")
+                                    {
+                                        <button type="button" class="btn btn-warning w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-action-id="@action.ActionId" data-quarter="3" data-action-name="@action.ImprovementAction">@($"{action.Quarter3Grade:F0}") % (@action.Quarter3Status)</button>
+                                        <form method="post" asp-controller="Ptci" asp-action="SubmitEvidence"><input type="hidden" name="ActionId" value="@action.ActionId" /><input type="hidden" name="Quarter" value="3" /><button type="submit" class="btn btn-sm btn-outline-success w-100">Enviar Evidencia</button></form>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-primary w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-action-id="@action.ActionId" data-quarter="3" data-action-name="@action.ImprovementAction">Subir</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
+                                    }
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-primary w-100 mb-2" disabled title="Debe completar y enviar el trimestre anterior">Subir</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="col-md-3 p-3 d-flex flex-column justify-content-between">
+                            <h6 class="mb-3">4to Trimestre</h6>
+                            <div>
+                                @if (action.Quarter4Status == "Pendiente de Revisión" || action.Quarter4Status == "Aprobado")
+                                {
+                                    <div class="btn btn-success disabled w-100 mb-2">@($"{action.Quarter4Grade:F0}") % (@action.Quarter4Status)</div>
+                                }
+                                else if (isT3Final)
+                                {
+                                    if (action.Quarter4Status == "Borrador" || action.Quarter4Status == "Sugerencia")
+                                    {
+                                        <button type="button" class="btn btn-warning w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-action-id="@action.ActionId" data-quarter="4" data-action-name="@action.ImprovementAction">@($"{action.Quarter4Grade:F0}") % (@action.Quarter4Status)</button>
+                                        <form method="post" asp-controller="Ptci" asp-action="SubmitEvidence"><input type="hidden" name="ActionId" value="@action.ActionId" /><input type="hidden" name="Quarter" value="4" /><button type="submit" class="btn btn-sm btn-outline-success w-100">Enviar Evidencia</button></form>
+                                    }
+                                    else
+                                    {
+                                        <button type="button" class="btn btn-primary w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-action-id="@action.ActionId" data-quarter="4" data-action-name="@action.ImprovementAction">Subir</button>
+                                        <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
+                                    }
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-primary w-100 mb-2" disabled title="Debe completar y enviar el trimestre anterior">Subir</button>
+                                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="uploadModalLabel">Subir Evidencia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="uploadForm" method="post" enctype="multipart/form-data" novalidate>
+                <div class="modal-body">
+                    <input type="hidden" id="modalActionId" name="ActionId" />
+                    <input type="hidden" id="modalQuarter" name="Quarter" />
+                    <input type="hidden" name="ElementId" value="@Model.ElementId" />
+                    @Html.AntiForgeryToken()
+
+                    <div class="alert alert-info" id="modalInfo"></div>
+
+                    <div id="existing-files-section" class="mb-3" style="display: none;">
+                        <label class="form-label"><strong>Archivos guardados en este borrador:</strong></label>
+                        <ul id="existing-files-list" class="list-group"></ul>
+                    </div>
+
+                    <div id="new-files-section" class="mb-3" style="display: none;">
+                        <label class="form-label"><strong>Nuevos archivos para subir:</strong></label>
+                        <ul id="staged-files-list" class="list-group"></ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <label id="file-input-label" for="fileUploadInput" class="form-label"><strong>Archivos de Evidencia</strong></label>
+                        <input type="file" id="fileUploadInput" class="form-control" multiple />
+                        <!--mensaje de validacion evidencia-->
+                        <span id="filesError" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="percentage" class="form-label"><strong>Porcentaje de Avance del Trimestre (%)</strong></label>
+                        <input type="number" id="modalPercentage" name="Percentage" class="form-control" min="1" max="100"  />
+                        <!--mensaje de validacion porcentaje de avance-->
+                        <span id="percentageError" class="text-danger small"></span>
+                    </div>
+                    <div class="mb-3">
+                        <label for="comment" class="form-label"><strong>Comentario (Opcional)</strong></label>
+                        <textarea id="modalComment" name="Comment" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Guardar Borrador</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+@section Scripts {
+    <script>
+        const uploadModalEl = document.getElementById('uploadModal');
+        const uploadForm = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileUploadInput');
+        const stagedFilesList = document.getElementById('staged-files-list');
+        const newFilesSection = document.getElementById('new-files-section');
+        const existingFilesList = document.getElementById('existing-files-list');
+        const existingFilesSection = document.getElementById('existing-files-section');
+
+        let stagedFiles = [];
+
+        function renderStagedFiles() {
+            stagedFilesList.innerHTML = '';
+            newFilesSection.style.display = stagedFiles.length > 0 ? 'block' : 'none';
+
+            stagedFiles.forEach((file, index) => {
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.textContent = file.name;
+                li.innerHTML += `<button type="button" class="btn-close" aria-label="Quitar" onclick="removeStagedFile(${index})"></button>`;
+                stagedFilesList.appendChild(li);
+            });
+        }
+
+        function removeStagedFile(index) {
+            stagedFiles.splice(index, 1);
+            renderStagedFiles();
+        }
+
+        fileInput.addEventListener('change', function(event) {
+            stagedFiles.push(...event.target.files);
+            renderStagedFiles();
+            event.target.value = '';
+        });
+
+        uploadModalEl.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const actionId = button.getAttribute('data-action-id');
+            const quarter = button.getAttribute('data-quarter');
+            const actionName = button.getAttribute('data-action-name');
+
+            const modalTitle = uploadModalEl.querySelector('.modal-title');
+            const modalInfo = uploadModalEl.querySelector('#modalInfo');
+            const modalActionIdInput = uploadModalEl.querySelector('#modalActionId');
+            const modalQuarterInput = uploadModalEl.querySelector('#modalQuarter');
+
+            const modalPercentageInput = uploadModalEl.querySelector('#modalPercentage');
+            const modalCommentInput = uploadModalEl.querySelector('#modalComment');
+            const fileInputLabel = uploadModalEl.querySelector('#file-input-label');
+
+            modalTitle.textContent = 'Subir Evidencia - ' + quarter + '° Trimestre';
+            modalInfo.textContent = 'Estás cargando evidencia para la acción: "' + actionName + '"';
+            modalActionIdInput.value = actionId;
+            modalQuarterInput.value = quarter;
+
+            stagedFiles = [];
+            renderStagedFiles();
+            modalPercentageInput.value = '';
+            modalCommentInput.value = '';
+            existingFilesList.innerHTML = '';
+            existingFilesSection.style.display = 'none';
+            fileInputLabel.textContent = 'Archivos de Evidencia';
+
+            fetch(`/Ptci/GetDraftDetails?actionId=${actionId}&quarter=${quarter}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        modalPercentageInput.value = data.percentage;
+                        modalCommentInput.value = data.comment;
+                        fileInputLabel.textContent = 'Añadir más archivos';
+
+                        if (data.attachments && data.attachments.length > 0) {
+                            existingFilesSection.style.display = 'block';
+                            data.attachments.forEach(file => {
+                                const li = document.createElement('li');
+                                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                                li.textContent = file.fileName;
+                                li.innerHTML += ` <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteAttachment(this, ${file.id})">Eliminar</button>`;
+                                existingFilesList.appendChild(li);
+                            });
+                        }
+                    }
+                });
+        });
+
+        uploadForm.addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            // limpiar mensajes
+            document.getElementById("percentageError").textContent = "";
+            document.getElementById("filesError").textContent = "";
+
+            let hasError = false;
+
+            const percentageInput = document.getElementById("modalPercentage");
+            const percentageValue = percentageInput.value.trim();
+
+            // validar que no esté vacío
+            if (percentageValue === "") {
+                document.getElementById("percentageError").textContent = "El porcentaje es obligatorio.";
+                hasError = true;
+            }
+
+            // validar que no sea 0
+            else if (parseInt(percentageValue) === 0) {
+                document.getElementById("percentageError").textContent = "El porcentaje debe ser mayor a 0.";
+                hasError = true;
+            }
+
+            // validar archivos
+            if (stagedFiles.length === 0 && existingFilesList.children.length === 0) {
+                document.getElementById("filesError").textContent = "Debe seleccionar al menos un archivo.";
+                hasError = true;
+            }
+
+            if (hasError) {
+                return;
+            }
+
+            const formData = new FormData(uploadForm);
+            stagedFiles.forEach(file => formData.append('Files', file));
+
+            const submitButton = uploadForm.querySelector('button[type="submit"]');
+            submitButton.disabled = true;
+            submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...`;
+
+            fetch('/Ptci/SaveDraft', {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+
+                console.log("Respuesta del servidor:", data);
+
+                if (data.success) {
+                    window.location.reload();
+                    return;
+                }
+
+                if (data.field === "percentage") {
+                    document.getElementById("percentageError").textContent = data.message;
+                }
+                else if (data.field === "files") {
+                    document.getElementById("filesError").textContent = data.message;
+                }
+                else {
+                    alert(data.message || "Ocurrió un error.");
+                }
+
+                submitButton.disabled = false;
+                submitButton.textContent = "Guardar Borrador";
+            })
+            .catch(error => {
+                console.error("Error real:", error);
+                alert("Problema de red.");
+            });
+        });
+
+        function deleteAttachment(buttonElement, attachmentId) {
+            if (!confirm('¿Estás seguro de que quieres eliminar este archivo permanentemente?')) {
+                return;
+            }
+
+            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
+            fetch('/Ptci/DeleteAttachment', {
+                method: 'POST',
+                body: JSON.stringify({ attachmentId: attachmentId }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': token
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    buttonElement.closest('li').remove();
+                } else {
+                    alert('Error al eliminar el archivo: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Ocurrió un error de red al intentar eliminar el archivo.');
+            });
+        }
+    </script>
+}

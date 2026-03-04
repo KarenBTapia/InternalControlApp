@@ -1,0 +1,187 @@
+﻿@model IEnumerable<InternalControlApp.Models.RisksPtar>
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+@{
+    ViewData["Title"] = "Panel PTAR";
+    var roleName = HttpContextAccessor.HttpContext!.Session.GetString("RoleName");
+    var homeController = (roleName == "Coordinador" || roleName == "Superadmin") ? "Coordinador" : "Enlace";
+}
+
+<style>
+    .no-wrap {
+        white-space: nowrap;
+    }
+</style>
+
+@section HeaderButtons {
+    @if (roleName == "Coordinador" || roleName == "Superadmin")
+    {
+        <a class="btn btn-primary" asp-controller="Ptar" asp-action="Create">[+] Agregar Riesgo</a>
+        <a class="btn" style="background-color: #E03E1A; color: white;" asp-controller="Ptar" asp-action="ExportToPdf">Exportar PDF</a>
+        <a class="btn" style="background-color: #247147; color: white;" asp-controller="Ptar" asp-action="ExportToExcel">Exportar Excel</a>
+    }
+    <a class="btn" style="background-color: #00A987; color: white;" asp-controller="@homeController" asp-action="Index">🔙Volver</a>
+}
+
+<h1 class="display-6 mb-4">Panel de Trabajo de Administración de Riesgos (PTAR)</h1>
+
+<div class="table-responsive card shadow-sm">
+    <table class="table table-bordered table-hover" style="font-size: 0.85rem; min-width: 3000px;">
+        <thead class="table-light text-center align-middle">
+            <tr>
+                <th rowspan="2">No. Riesgo</th>
+                <th rowspan="2">Descripción del Riesgo</th>
+                <th rowspan="2">Clasificación</th>
+                <th rowspan="2">Grado de Impacto</th>
+                <th rowspan="2">Prob. de Ocurrencia</th>
+                <th rowspan="2">Cuadrante</th>
+                <th rowspan="2">Estrategia</th>
+                <th rowspan="2">No. Factor</th>
+                <th rowspan="2">Factor de Riesgo</th>
+                <th rowspan="2">Acción de Control</th>
+                <th rowspan="2">Unidad Administrativa</th>
+                <th rowspan="2">Responsable</th>
+                <th rowspan="2">Fecha de Inicio</th>
+                <th rowspan="2">Fecha de Término</th>
+                <th rowspan="2">Medios de Verificación</th>
+                <th colspan="@((roleName == "Enlace") ? 1 : 2)">1er Trimestre</th>
+                <th colspan="@((roleName == "Enlace") ? 1 : 2)">2do Trimestre</th>
+                <th colspan="@((roleName == "Enlace") ? 1 : 2)">3er Trimestre</th>
+                <th colspan="@((roleName == "Enlace") ? 1 : 2)">4to Trimestre</th>
+                <th rowspan="2">Acción</th>
+            </tr>
+            <tr>
+                <th>Enlace</th>
+                @if (roleName != "Enlace")
+                {
+                    <th>Comisaria</th>
+                }
+                <th>Enlace</th>
+                @if (roleName != "Enlace")
+                {
+                    <th>Comisaria</th>
+                }
+                <th>Enlace</th>
+                @if (roleName != "Enlace")
+                {
+                    <th>Comisaria</th>
+                }
+                <th>Enlace</th>
+                @if (roleName != "Enlace")
+                {
+                    <th>Comisaria</th>
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="25" class="text-center text-muted">No hay riesgos registrados o asignados en el programa PTAR.</td>
+                </tr>
+            }
+            @foreach (var risk in Model)
+            {
+                var factors = risk.RiskFactorsPtars.ToList();
+                var rowSpanCount = factors.Any() ? factors.Count : 1;
+
+                if (factors.Any())
+                {
+                    for (int i = 0; i < factors.Count; i++)
+                    {
+                        var factor = factors[i];
+                        <tr>
+                            @if (i == 0)
+                            {
+                                <td rowspan="@rowSpanCount" class="align-middle">@risk.RiskNumber</td>
+                                <td rowspan="@rowSpanCount" class="align-middle" style="white-space: normal;">@risk.Description</td>
+                                <td rowspan="@rowSpanCount" class="align-middle">@risk.RiskClassification</td>
+                                <td rowspan="@rowSpanCount" class="align-middle text-center">@risk.ImpactGrade</td>
+                                <td rowspan="@rowSpanCount" class="align-middle text-center">@risk.OccurrenceProbability</td>
+                                <td rowspan="@rowSpanCount" class="align-middle text-center">@risk.Quadrant</td>
+                                <td rowspan="@rowSpanCount" class="align-middle">@risk.Strategy</td>
+                            }
+                            <td class="text-center">@factor.FactorNumber</td>
+                            <td style="white-space: normal;">@factor.FactorDescription</td>
+                            <td style="white-space: normal;">@factor.ControlAction</td>
+                            <td>@(factor.Unit?.UnitName)</td>
+                            <td>@(factor.ResponsibleUser != null ? $"{factor.ResponsibleUser.FirstName} {factor.ResponsibleUser.LastName}" : "")</td>
+                            <td class="text-center">@factor.StartDate?.ToString("dd/MM/yyyy")</td>
+                            <td class="text-center">@factor.EndDate?.ToString("dd/MM/yyyy")</td>
+                            <td style="white-space: normal;">@factor.VerificationMeans</td>
+                            <td class="text-center">@(factor.Quarter1Grade.HasValue ? $"{factor.Quarter1Grade.Value:F0} %" : "")</td>
+                            @if (roleName != "Enlace")
+                            {
+                                <td class="text-center no-wrap">@(factor.Quarter1GradeOic.HasValue ? $"{factor.Quarter1GradeOic.Value:F0} %" : "")</td>
+                            }
+                            <td class="text-center">@(factor.Quarter2Grade.HasValue ? $"{factor.Quarter2Grade.Value:F0} %" : "")</td>
+                            @if (roleName != "Enlace")
+                            {
+                                <td class="text-center no-wrap">@(factor.Quarter2GradeOic.HasValue ? $"{factor.Quarter2GradeOic.Value:F0} %" : "")</td>
+                            }
+                            <td class="text-center">@(factor.Quarter3Grade.HasValue ? $"{factor.Quarter3Grade.Value:F0} %" : "")</td>
+                            @if (roleName != "Enlace")
+                            {
+                                <td class="text-center no-wrap">@(factor.Quarter3GradeOic.HasValue ? $"{factor.Quarter3GradeOic.Value:F0} %" : "")</td>
+                            }
+                            <td class="text-center">@(factor.Quarter4Grade.HasValue ? $"{factor.Quarter4Grade.Value:F0} %" : "")</td>
+                            @if (roleName != "Enlace")
+                            {
+                                <td class="text-center no-wrap">@(factor.Quarter4GradeOic.HasValue ? $"{factor.Quarter4GradeOic.Value:F0} %" : "")</td>
+                            }
+                            @if (i == 0)
+                            {
+                                <td rowspan="@rowSpanCount" class="text-center align-middle">
+                                    @if (roleName == "Coordinador" || roleName == "Superadmin")
+                                    {
+                                        <div class="d-flex justify-content-center gap-2">
+                                            <a asp-controller="Ptar" asp-action="Edit" asp-route-id="@risk.RiskId" class="btn btn-sm btn-outline-primary" title="Editar">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <form asp-controller="Ptar" asp-action="Delete" asp-route-id="@risk.RiskId" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este Riesgo y todos sus factores asociados?');">
+                                                <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    }
+                                    else if (roleName == "Enlace")
+                                    {
+                                        <a asp-action="Upload" asp-route-id="@risk.RiskId" class="btn btn-sm btn-success d-block">[+] Evidencia</a>
+                                    }
+                                </td>
+                            }
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td class="align-middle">@risk.RiskNumber</td>
+                        <td class="align-middle" style="white-space: normal;">@risk.Description</td>
+                        <td class="align-middle">@risk.RiskClassification</td>
+                        <td class="align-middle text-center">@risk.ImpactGrade</td>
+                        <td class="align-middle text-center">@risk.OccurrenceProbability</td>
+                        <td class="align-middle text-center">@risk.Quadrant</td>
+                        <td class="align-middle">@risk.Strategy</td>
+                        <td colspan="@(roleName == "Enlace" ? 12 : 16)" class="text-center text-muted">No hay factores de riesgo asignados.</td>
+                        <td class="text-center align-middle">
+                            @if (roleName == "Coordinador" || roleName == "Superadmin")
+                            {
+                                <div class="d-flex justify-content-center gap-2">
+                                    <a asp-controller="Ptar" asp-action="Edit" asp-route-id="@risk.RiskId" class="btn btn-sm btn-outline-primary" title="Editar">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <form asp-controller="Ptar" asp-action="Delete" asp-route-id="@risk.RiskId" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este Riesgo y todos sus factores asociados?');">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            }
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>

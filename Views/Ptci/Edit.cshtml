@@ -1,0 +1,205 @@
+﻿@model InternalControlApp.Models.EditElementPtciViewModel
+@{
+    ViewData["Title"] = "Editar Elemento PTCI";
+}
+
+@section HeaderButtons {
+    <a class="btn" style="background-color: #00A987; color: white;"
+       asp-action="Index">🔙Volver</a>
+}
+
+<h1 class="display-6 mb-4">Editar Tarea PTCI</h1>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="ElementId" />
+    <div class="card shadow-sm mb-4">
+        <div class="card-header"><h5>Información del Elemento de Control</h5></div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Ngci" class="form-label"></label>
+                    <input asp-for="Ngci" class="form-control" />
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ControlNumber" class="form-label"></label>
+                    <input asp-for="ControlNumber" class="form-control" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ControlElement" class="form-label"></label>
+                <textarea asp-for="ControlElement" class="form-control" rows="2"></textarea>
+                <span asp-validation-for="ControlElement" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div id="actions-container">
+        @for (int i = 0; i < Model.Actions.Count; i++)
+        {
+            <div class="card shadow-sm mb-4 action-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Acción de Mejora #@(i + 1)</h5>
+                    <button type="button" class="btn-close" onclick="removeAction(this)"></button>
+                </div>
+                <div class="card-body">
+                    <input type="hidden" asp-for="Actions[i].ActionId" />
+                    <input type="hidden" asp-for="Actions[i].Quarter1Grade" />
+                    <input type="hidden" asp-for="Actions[i].Quarter2Grade" />
+                    <input type="hidden" asp-for="Actions[i].Quarter3Grade" />
+                    <input type="hidden" asp-for="Actions[i].Quarter4Grade" />
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Actions[i].Process" class="form-label"></label>
+                            <input asp-for="Actions[i].Process" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Actions[i].ActionNumber" class="form-label"></label>
+                            <input asp-for="Actions[i].ActionNumber" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Actions[i].ImprovementAction" class="form-label"></label>
+                        <textarea asp-for="Actions[i].ImprovementAction" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="Actions[i].ImprovementAction" class="text-danger"></span>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Actions[i].UnitId" class="form-label"></label>
+                            <select asp-for="Actions[i].UnitId" class="form-select" asp-items="@(new SelectList(Model.UnitsList, "Value", "Text"))"></select>
+                            <span asp-validation-for="Actions[i].UnitId" class="text-danger"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Actions[i].ResponsibleUserId" class="form-label"></label>
+                            <select asp-for="Actions[i].ResponsibleUserId" class="form-select" asp-items="@(new SelectList(Model.UsersList, "Value", "Text"))"></select>
+                            <span asp-validation-for="Actions[i].ResponsibleUserId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    @* --- INICIO DE LA MODIFICACIÓN (1/2) --- *@
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Actions[i].StartDate" class="form-label"></label>
+                            <input asp-for="Actions[i].StartDate" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Actions[i].EndDate" class="form-label"></label>
+                            <input asp-for="Actions[i].EndDate" type="date" class="form-control" />
+                        </div>
+                    </div>
+                    @* --- FIN DE LA MODIFICACIÓN (1/2) --- *@
+
+                    <div class="mb-3">
+                        <label asp-for="Actions[i].VerificationMeans" class="form-label"></label>
+                        <input asp-for="Actions[i].VerificationMeans" class="form-control" />
+                    </div>
+                    <hr />
+                    <h6 class="mb-3">Calificaciones del Coordinador (Comisaria)</h6>
+                    <div class="row">
+                        <div class="col-md-3 mb-3"><label asp-for="Actions[i].Quarter1GradeOic" class="form-label"></label><input asp-for="Actions[i].Quarter1GradeOic" class="form-control" /></div>
+                        <div class="col-md-3 mb-3"><label asp-for="Actions[i].Quarter2GradeOic" class="form-label"></label><input asp-for="Actions[i].Quarter2GradeOic" class="form-control" /></div>
+                        <div class="col-md-3 mb-3"><label asp-for="Actions[i].Quarter3GradeOic" class="form-label"></label><input asp-for="Actions[i].Quarter3GradeOic" class="form-control" /></div>
+                        <div class="col-md-3 mb-3"><label asp-for="Actions[i].Quarter4GradeOic" class="form-label"></label><input asp-for="Actions[i].Quarter4GradeOic" class="form-control" /></div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <button type="button" id="add-action-btn" class="btn btn-success">[+] Agregar Acción de Mejora</button>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        var unitsOptions = '@Html.Raw(Json.Serialize(Model.UnitsList))';
+        var usersOptions = '@Html.Raw(Json.Serialize(Model.UsersList))';
+        var units = JSON.parse(unitsOptions);
+        var users = JSON.parse(usersOptions);
+        var actionIndex = @Model.Actions.Count;
+
+        document.getElementById('add-action-btn').addEventListener('click', function () {
+            addNewAction();
+        });
+
+        // --- INICIO DE LA CORRECCIÓN: Se cambia el estilo de declaración de las funciones ---
+        var generateOptions = function(optionsList) {
+            var optionsHtml = '';
+            for (var i = 0; i < optionsList.length; i++) {
+                optionsHtml += `<option value="${optionsList[i].value}">${optionsList[i].text}</option>`;
+            }
+            return optionsHtml;
+        };
+
+        var addNewAction = function() {
+            var actionHtml = `
+            <div class="card shadow-sm mb-4 action-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Nueva Acción de Mejora</h5>
+                     <button type="button" class="btn-close" onclick="removeAction(this)"></button>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label">Proceso</label><input name="Actions[${actionIndex}].Process" class="form-control" /></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">No. Acción</label><input name="Actions[${actionIndex}].ActionNumber" class="form-control" /></div>
+                    </div>
+                    <div class="mb-3"><label class="form-label">Acción de Mejora *</label><textarea name="Actions[${actionIndex}].ImprovementAction" class="form-control" rows="2" required></textarea></div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3"><label class="form-label">Unidad Administrativa *</label><select name="Actions[${actionIndex}].UnitId" class="form-select" required><option value="">-- Seleccione --</option>${generateOptions(units)}</select></div>
+                        <div class="col-md-6 mb-3"><label class="form-label">Responsable *</label><select name="Actions[${actionIndex}].ResponsibleUserId" class="form-select" required><option value="">-- Seleccione --</option>${generateOptions(users)}</select></div>
+                    </div>
+            <div class="row">
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Fecha de Inicio</label>
+                <input name="Actions[${actionIndex}].StartDate" type="date" class="form-control" />
+            </div>
+            <div class="col-md-6 mb-3">
+                <label class="form-label">Fecha de Término</label>
+                <input name="Actions[${actionIndex}].EndDate" type="date" class="form-control" />
+            </div>
+            </div>
+                    <div class="mb-3"><label class="form-label">Medios de Verificación</label><input name="Actions[${actionIndex}].VerificationMeans" class="form-control" /></div>
+                    <hr/>
+                    <h6 class="mb-3">Calificaciones del Coordinador (Comisaria)</h6>
+                    <div class="row">
+                        <div class="col-md-3 mb-3"><label class="form-label">1er Trim Comisaria</label><input name="Actions[${actionIndex}].Quarter1GradeOic" class="form-control" /></div>
+                        <div class="col-md-3 mb-3"><label class="form-label">2do Trim Comisaria</label><input name="Actions[${actionIndex}].Quarter2GradeOic" class="form-control" /></div>
+                        <div class="col-md-3 mb-3"><label class="form-label">3er Trim Comisaria</label><input name="Actions[${actionIndex}].Quarter3GradeOic" class="form-control" /></div>
+                        <div class="col-md-3 mb-3"><label class="form-label">4to Trim Comisaria</label><input name="Actions[${actionIndex}].Quarter4GradeOic" class="form-control" /></div>
+                    </div>
+                </div>
+            </div>`;
+            document.getElementById('actions-container').insertAdjacentHTML('beforeend', actionHtml);
+            actionIndex++;
+        };
+
+        var removeAction = function(button) {
+            button.closest('.action-card').remove();
+            reindexActions();
+        };
+
+        var reindexActions = function() {
+            var actionCards = document.querySelectorAll('.action-card');
+            actionIndex = 0;
+            actionCards.forEach(function(card) {
+                // El título de las tarjetas existentes no se renumera para evitar confusión
+                card.querySelectorAll('input, select, textarea').forEach(function(input) {
+                    var oldName = input.name;
+                    if (oldName) {
+                        input.name = oldName.replace(/Actions\[\d+\]/, `Actions[${actionIndex}]`);
+                    }
+                });
+                actionIndex++;
+            });
+        };
+        // --- FIN DE LA CORRECCIÓN ---
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

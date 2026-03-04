@@ -1,0 +1,154 @@
+﻿@model InternalControlApp.Models.CreateElementPtciViewModel
+@{
+    ViewData["Title"] = "Agregar Elemento PTCI";
+}
+
+@section HeaderButtons {
+    <a class="btn" style="background-color: #00A987; color: white;" asp-action="Index">🔙Volver</a>
+}
+
+<h1 class="display-6 mb-4">Agregar Nuevo Elemento PTCI</h1>
+
+<form asp-action="Create" method="post" id="ptciForm">
+    <div class="card shadow-sm mb-4">
+        <div class="card-header"><h5>Información del Elemento de Control</h5></div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="Ngci" class="form-label">NGCI *</label>
+                    <input asp-for="Ngci" class="form-control" required />
+                    <span asp-validation-for="Ngci" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="ControlNumber" class="form-label">No. Control *</label>
+                    <input asp-for="ControlNumber" class="form-control" required />
+                    <span asp-validation-for="ControlNumber" class="text-danger"></span>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="ControlElement" class="form-label">Elemento de Control *</label>
+                <textarea asp-for="ControlElement" class="form-control" rows="2" required></textarea>
+                <span asp-validation-for="ControlElement" class="text-danger"></span>
+            </div>
+        </div>
+    </div>
+
+    <div id="actions-container"></div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <button type="button" id="add-action-btn" class="btn btn-success">[+] Agregar Acción de Mejora</button>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Guardar Elemento</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        var unitsOptions = '@Html.Raw(Json.Serialize(Model.UnitsList))';
+        var usersOptions = '@Html.Raw(Json.Serialize(Model.UsersList))';
+
+        var units = JSON.parse(unitsOptions);
+        var users = JSON.parse(usersOptions);
+
+        var actionIndex = 0;
+
+        document.getElementById('add-action-btn').addEventListener('click', function() {
+            addNewAction();
+        });
+
+        function addNewAction() {
+            var actionHtml = `
+                <div class="card shadow-sm mb-4 action-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>Acción de Mejora #${actionIndex + 1}</h5>
+                        <button type="button" class="btn-close" onclick="removeAction(this)"></button>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Proceso *</label>
+                                <input name="Actions[${actionIndex}].Process" class="form-control" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">No. Acción *</label>
+                                <input name="Actions[${actionIndex}].ActionNumber" class="form-control" required />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Acción de Mejora *</label>
+                            <textarea name="Actions[${actionIndex}].ImprovementAction" class="form-control" rows="2" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Unidad Administrativa *</label>
+                                <select name="Actions[${actionIndex}].UnitId" class="form-select" required>
+                                    <option value="">-- Seleccione --</option>
+                                    ${generateOptions(units)}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Responsable *</label>
+                                <select name="Actions[${actionIndex}].ResponsibleUserId" class="form-select" required>
+                                    <option value="">-- Seleccione --</option>
+                                    ${generateOptions(users)}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Fecha de Inicio *</label>
+                                <input name="Actions[${actionIndex}].StartDate" type="date" class="form-control" required />
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Fecha de Término *</label>
+                                <input name="Actions[${actionIndex}].EndDate" type="date" class="form-control" required />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Medios de Verificación *</label>
+                            <input name="Actions[${actionIndex}].VerificationMeans" class="form-control" required />
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('actions-container').insertAdjacentHTML('beforeend', actionHtml);
+            actionIndex++;
+        }
+
+        function generateOptions(optionsList) {
+            var optionsHtml = '';
+            for (var i = 0; i < optionsList.length; i++) {
+                optionsHtml += `<option value="${optionsList[i].value}">${optionsList[i].text}</option>`;
+            }
+            return optionsHtml;
+        }
+
+        function removeAction(button) {
+            button.closest('.action-card').remove();
+            reindexActions();
+        }
+
+        function reindexActions() {
+            var actionCards = document.querySelectorAll('.action-card');
+            actionIndex = 0;
+
+            actionCards.forEach(function(card) {
+                card.querySelector('h5').textContent = `Acción de Mejora #${actionIndex + 1}`;
+                card.querySelectorAll('input, select, textarea').forEach(function(input) {
+                    var oldName = input.name;
+                    if (oldName) {
+                        input.name = oldName.replace(/Actions\[\d+\]/, `Actions[${actionIndex}]`);
+                    }
+                });
+                actionIndex++;
+            });
+        }
+    </script>
+
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

@@ -1,0 +1,235 @@
+﻿@model InternalControlApp.Models.EditRiskPtarViewModel
+@{
+    ViewData["Title"] = "Editar Elemento PTAR";
+}
+
+@section HeaderButtons {
+    <a class="btn" style="background-color: #00A987; color: white;"
+       asp-action="Index">🔙Volver</a>
+}
+
+<h1 class="display-6 mb-4">Editar Riesgo (PTAR)</h1>
+
+<form asp-action="Edit" method="post">
+    <input type="hidden" asp-for="RiskId" />
+    <div class="card shadow-sm mb-4">
+        <div class="card-header"><h5>Información del Riesgo</h5></div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6 mb-3">
+                    <label asp-for="RiskNumber" class="form-label"></label>
+                    <input asp-for="RiskNumber" class="form-control" />
+                    <span asp-validation-for="RiskNumber" class="text-danger"></span>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <label asp-for="RiskClassification" class="form-label"></label>
+                    <input asp-for="RiskClassification" class="form-control" />
+                </div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Description" class="form-label"></label>
+                <textarea asp-for="Description" class="form-control" rows="2"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <label asp-for="ImpactGrade" class="form-label"></label>
+                    <input asp-for="ImpactGrade" type="number" class="form-control" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="OccurrenceProbability" class="form-label"></label>
+                    <input asp-for="OccurrenceProbability" type="number" class="form-control" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="Quadrant" class="form-label"></label>
+                    <input asp-for="Quadrant" class="form-control" />
+                </div>
+                <div class="col-md-3 mb-3">
+                    <label asp-for="Strategy" class="form-label"></label>
+                    <input asp-for="Strategy" class="form-control" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="factors-container">
+        @for (int i = 0; i < Model.Factors.Count; i++)
+        {
+            <div class="card shadow-sm mb-4 factor-card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5>Factor de Riesgo #@(i + 1)</h5>
+                    <button type="button" class="btn-close" onclick="removeFactor(this)"></button>
+                </div>
+                <div class="card-body">
+                    <input type="hidden" asp-for="Factors[i].FactorId" />
+                    <input type="hidden" asp-for="Factors[i].Quarter1Grade" />
+                    <input type="hidden" asp-for="Factors[i].Quarter2Grade" />
+                    <input type="hidden" asp-for="Factors[i].Quarter3Grade" />
+                    <input type="hidden" asp-for="Factors[i].Quarter4Grade" />
+
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <label asp-for="Factors[i].FactorNumber" class="form-label"></label>
+                            <input asp-for="Factors[i].FactorNumber" class="form-control" />
+                        </div>
+                        <div class="col-md-9 mb-3">
+                            <label asp-for="Factors[i].FactorDescription" class="form-label"></label>
+                            <input asp-for="Factors[i].FactorDescription" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Factors[i].ControlAction" class="form-label"></label>
+                        <textarea asp-for="Factors[i].ControlAction" class="form-control" rows="2"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Factors[i].UnitId" class="form-label"></label>
+                            <select asp-for="Factors[i].UnitId" class="form-select" asp-items="@(new SelectList(Model.UnitsList, "Value", "Text"))"></select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Factors[i].ResponsibleUserId" class="form-label"></label>
+                            <select asp-for="Factors[i].ResponsibleUserId" class="form-select" asp-items="@(new SelectList(Model.UsersList, "Value", "Text"))"></select>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Factors[i].StartDate" class="form-label"></label>
+                            <input asp-for="Factors[i].StartDate" type="date" class="form-control" />
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="Factors[i].EndDate" class="form-label"></label>
+                            <input asp-for="Factors[i].EndDate" type="date" class="form-control" />
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label asp-for="Factors[i].VerificationMeans" class="form-label"></label>
+                        <input asp-for="Factors[i].VerificationMeans" class="form-control" />
+                    </div>
+                    <hr />
+                    <h6 class="mb-3">Calificaciones del Coordinador (Comisaria)</h6>
+                    <div class="row">
+                        <div class="col-md-3 mb-3"><label asp-for="Factors[i].Quarter1GradeOic" class="form-label"></label><input asp-for="Factors[i].Quarter1GradeOic" class="form-control" /></div>
+                        <div class="col-md-3 mb-3"><label asp-for="Factors[i].Quarter2GradeOic" class="form-label"></label><input asp-for="Factors[i].Quarter2GradeOic" class="form-control" /></div>
+                        <div class="col-md-3 mb-3"><label asp-for="Factors[i].Quarter3GradeOic" class="form-label"></label><input asp-for="Factors[i].Quarter3GradeOic" class="form-control" /></div>
+                        <div class="col-md-3 mb-3"><label asp-for="Factors[i].Quarter4GradeOic" class="form-label"></label><input asp-for="Factors[i].Quarter4GradeOic" class="form-control" /></div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+
+    <div class="d-flex justify-content-between mt-4">
+        <button type="button" id="add-factor-btn" class="btn btn-success">[+] Agregar Factor de Riesgo</button>
+        <div>
+            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            <button type="submit" class="btn btn-primary">Guardar Cambios</button>
+        </div>
+    </div>
+</form>
+
+@section Scripts {
+    <script>
+        var unitsOptions = '@Html.Raw(Json.Serialize(Model.UnitsList))';
+        var usersOptions = '@Html.Raw(Json.Serialize(Model.UsersList))';
+        var units = JSON.parse(unitsOptions);
+        var users = JSON.parse(usersOptions);
+        var factorIndex = @Model.Factors.Count;
+
+        document.getElementById('add-factor-btn').addEventListener('click', function () {
+            addNewFactor();
+        });
+
+        function generateOptions(optionsList) {
+            return optionsList.map(opt => `<option value="${opt.value}">${opt.text}</option>`).join('');
+        }
+
+        function addNewFactor() {
+            var factorHtml = `
+                <div class="card shadow-sm mb-4 factor-card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5>Nuevo Factor de Riesgo</h5>
+                        <button type="button" class="btn-close" onclick="removeFactor(this)"></button>
+                    </div>
+                    <div class="card-body">
+                         <div class="row">
+                            <div class="col-md-3 mb-3">
+                                <label class="form-label">No. Factor</label>
+                                <input name="Factors[${factorIndex}].FactorNumber" class="form-control" />
+                            </div>
+                            <div class="col-md-9 mb-3">
+                                <label class="form-label">Factor de Riesgo</label>
+                                <input name="Factors[${factorIndex}].FactorDescription" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Acción de Control *</label>
+                            <textarea name="Factors[${factorIndex}].ControlAction" class="form-control" rows="2" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Unidad Administrativa *</label>
+                                <select name="Factors[${factorIndex}].UnitId" class="form-select" required>
+                                    <option value="">-- Seleccione --</option>
+                                    ${generateOptions(units)}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Responsable *</label>
+                                <select name="Factors[${factorIndex}].ResponsibleUserId" class="form-select" required>
+                                    <option value="">-- Seleccione --</option>
+                                    ${generateOptions(users)}
+                                </select>
+                            </div>
+                        </div>
+                        <div class="row">
+                             <div class="col-md-6 mb-3">
+                                <label class="form-label">Fecha de Inicio</label>
+                                <input name="Factors[${factorIndex}].StartDate" type="date" class="form-control" />
+                            </div>
+                             <div class="col-md-6 mb-3">
+                                <label class="form-label">Fecha de Término</label>
+                                <input name="Factors[${factorIndex}].EndDate" type="date" class="form-control" />
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Medios de Verificación</label>
+                            <input name="Factors[${factorIndex}].VerificationMeans" class="form-control" />
+                        </div>
+                        <hr />
+                        <h6 class="mb-3">Calificaciones del Coordinador (Comisaria)</h6>
+                        <div class="row">
+                            <div class="col-md-3 mb-3"><label class="form-label">1er Trim Comisaria</label><input name="Factors[${factorIndex}].Quarter1GradeOic" class="form-control" /></div>
+                            <div class="col-md-3 mb-3"><label class="form-label">2do Trim Comisaria</label><input name="Factors[${factorIndex}].Quarter2GradeOic" class="form-control" /></div>
+                            <div class="col-md-3 mb-3"><label class="form-label">3er Trim Comisaria</label><input name="Factors[${factorIndex}].Quarter3GradeOic" class="form-control" /></div>
+                            <div class="col-md-3 mb-3"><label class="form-label">4to Trim Comisaria</label><input name="Factors[${factorIndex}].Quarter4GradeOic" class="form-control" /></div>
+                        </div>
+                    </div>
+                </div>`;
+            document.getElementById('factors-container').insertAdjacentHTML('beforeend', factorHtml);
+            factorIndex++;
+        }
+
+        function removeFactor(button) {
+            button.closest('.factor-card').remove();
+            reindexFactors();
+        }
+
+        function reindexFactors() {
+            var factorCards = document.querySelectorAll('.factor-card');
+            factorIndex = 0;
+            factorCards.forEach(function(card) {
+                // El título no se re-numera en la edición para evitar confusión
+                card.querySelectorAll('input, select, textarea').forEach(function(input) {
+                    var oldName = input.name;
+                    if (oldName) {
+                        input.name = oldName.replace(/Factors\[\d+\]/, `Factors[${factorIndex}]`);
+                    }
+                });
+                factorIndex++;
+            });
+        }
+    </script>
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

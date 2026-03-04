@@ -1,0 +1,138 @@
+﻿@model IEnumerable<InternalControlApp.Models.ControlElementsPtci>
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Reporte PTCI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            border: 1px solid #cccccc;
+            text-align: left;
+            padding: 4px;
+            word-wrap: break-word;
+        }
+
+        th {
+            background-color: #f2f2f2;
+            text-align: center;
+        }
+
+        .align-middle {
+            vertical-align: middle;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h2, h4 {
+            margin: 0;
+            padding: 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h2>Programa de Trabajo de Control Interno (PTCI)</h2>
+        <h4>Fecha de Generación: @DateTime.Now.ToString("dd/MM/yyyy")</h4>
+    </div>
+    <table>
+        <thead>
+            <tr>
+                <th rowspan="2">NGCI</th>
+                <th rowspan="2">No.</th>
+                <th rowspan="2">Elemento de Control</th>
+                <th rowspan="2">Proceso</th>
+                <th rowspan="2">No.</th>
+                <th rowspan="2">Acción de Mejora</th>
+                <th rowspan="2">Unidad Administrativa</th>
+                <th rowspan="2">Responsable</th>
+                <th rowspan="2">Fecha Inicio</th>
+                <th rowspan="2">Fecha Término</th>
+                <th rowspan="2">Medios de Verificación</th>
+                <th colspan="2">1er Trimestre</th>
+                <th colspan="2">2do Trimestre</th>
+                <th colspan="2">3er Trimestre</th>
+                <th colspan="2">4to Trimestre</th>
+            </tr>
+            <tr>
+                <th>Enlace</th>
+                <th>Comisaria</th>
+                <th>Enlace</th>
+                <th>Comisaria</th>
+                <th>Enlace</th>
+                <th>Comisaria</th>
+                <th>Enlace</th>
+                <th>Comisaria</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var element in Model)
+            {
+                var actions = element.ImprovementActionsPtcis.ToList();
+                var rowSpanCount = actions.Any() ? actions.Count : 1;
+
+                if (actions.Any())
+                {
+                    for (int i = 0; i < actions.Count; i++)
+                    {
+                        var action = actions[i];
+                        <tr>
+                            @if (i == 0)
+                            {
+                                <td rowspan="@rowSpanCount" class="align-middle">@element.Ngci</td>
+                                <td rowspan="@rowSpanCount" class="align-middle text-center">@element.ControlNumber</td>
+                                <td rowspan="@rowSpanCount" class="align-middle">@element.ControlElement</td>
+                            }
+                            <td>@action.Process</td>
+                            <td class="text-center">@action.ActionNumber</td>
+                            <td>@action.ImprovementAction</td>
+                            <td>@action.Unit.UnitName</td>
+                            <td>@(action.ResponsibleUser != null ? $"{action.ResponsibleUser.FirstName} {action.ResponsibleUser.LastName}" : "")</td>
+                            <td class="text-center">@action.StartDate?.ToString("dd/MM/yy")</td>
+                            <td class="text-center">@action.EndDate?.ToString("dd/MM/yy")</td>
+                            <td>@action.VerificationMeans</td>
+
+                            <td class="text-center">@(action.Quarter1Grade.HasValue ? $"{action.Quarter1Grade.Value:F0} %" : "")</td>
+                            <td class="text-center">@(action.Quarter1GradeOic.HasValue ? $"{action.Quarter1GradeOic.Value:F0} %" : "")</td>
+                            <td class="text-center">@(action.Quarter2Grade.HasValue ? $"{action.Quarter2Grade.Value:F0} %" : "")</td>
+                            <td class="text-center">@(action.Quarter2GradeOic.HasValue ? $"{action.Quarter2GradeOic.Value:F0} %" : "")</td>
+                            <td class="text-center">@(action.Quarter3Grade.HasValue ? $"{action.Quarter3Grade.Value:F0} %" : "")</td>
+                            <td class="text-center">@(action.Quarter3GradeOic.HasValue ? $"{action.Quarter3GradeOic.Value:F0} %" : "")</td>
+                            <td class="text-center">@(action.Quarter4Grade.HasValue ? $"{action.Quarter4Grade.Value:F0} %" : "")</td>
+                            <td class="text-center">@(action.Quarter4GradeOic.HasValue ? $"{action.Quarter4GradeOic.Value:F0} %" : "")</td>
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td class="align-middle">@element.Ngci</td>
+                        <td class="align-middle text-center">@element.ControlNumber</td>
+                        <td class="align-middle">@element.ControlElement</td>
+                        <td colspan="15" class="text-center">No hay acciones de mejora asignadas.</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</body>
+</html>

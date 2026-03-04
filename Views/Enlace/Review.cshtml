@@ -1,0 +1,94 @@
+﻿@model InternalControlApp.Models.EnlaceReviewViewModel
+@{
+    ViewData["Title"] = "Detalle de Entrega";
+    var isSugerencia = Model.Status == "Sugerencia";
+    var statusClass = isSugerencia ? "bg-warning text-dark" : "bg-success";
+    var controllerName = Model.ProgramType == "PTCI" ? "Ptci" : "Ptar";
+}
+
+@section HeaderButtons {
+    <a class="btn" style="background-color: #00A987; color: white;" asp-action="Index">🔙Volver</a>
+}
+
+<h1 class="display-6 mb-4">Detalle de Entrega</h1>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5>Información de la Entrega</h5>
+        <span class="badge @statusClass fs-6">@Model.Status</span>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-4"><label class="fw-bold">Programa:</label> <p class="text-muted">@Model.ProgramType</p></div>
+            <div class="col-md-4"><label class="fw-bold">Trimestre:</label> <p class="text-muted">@Model.QuarterNumber</p></div>
+            <div class="col-md-4"><label class="fw-bold">Fecha de Entrega/Revisión:</label> <p class="text-muted">@Model.SubmissionDate.ToString("dd/MM/yyyy HH:mm")</p></div>
+        </div>
+        <hr />
+        <div>
+            <label class="fw-bold">@Model.ParentTaskNumber - @Model.ParentTaskDescription</label>
+            <p class="text-muted">@Model.TaskDescription</p>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header">
+                <h5>Archivos de Evidencia Entregados</h5>
+            </div>
+            <div class="card-body">
+                @if (Model.Attachments.Any())
+                {
+                    <ul class="list-group">
+                        @foreach (var file in Model.Attachments)
+                        {
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                @if (file.OriginalFileName.StartsWith("[C]_"))
+                                {
+                                    // Si tiene la marca, mostramos el mensaje y el nombre limpio
+                                    <a href="~/@file.StoragePath" target="_blank">@file.OriginalFileName.Substring(4)</a>
+                                    <span class="badge bg-info text-dark">Añadido por el Coordinador</span>
+                                }
+                                else
+                                {
+                                    // Si no, lo mostramos normal
+                                    <a href="~/@file.StoragePath" target="_blank">@file.OriginalFileName</a>
+                                }
+                            </li>
+                        }
+                    </ul>
+                }
+                else
+                {
+                    <p class="text-muted">No se adjuntaron archivos.</p>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-4">
+        <div class="card shadow-sm">
+            <div class="card-header">
+                <h5>Comentarios y Retroalimentación</h5>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <label class="fw-bold">Mi Comentario:</label>
+                    <p class="form-control-plaintext bg-light p-2 rounded">@(Model.UserComment ?? "Sin comentario.")</p>
+                </div>
+                <div class="mb-3">
+                    <label class="fw-bold">Retroalimentación del Coordinador:</label>
+                    <p class="form-control-plaintext bg-light p-2 rounded">@(Model.DirectorFeedback ?? "Pendiente de retroalimentación.")</p>
+                </div>
+            </div>
+            @if (isSugerencia)
+            {
+                <div class="card-footer d-grid">
+                    <a asp-controller="@controllerName" asp-action="Upload" asp-route-id="@Model.ParentTaskId" class="btn btn-primary">
+                        <i class="fas fa-edit"></i> Ir a Corregir Evidencia
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
