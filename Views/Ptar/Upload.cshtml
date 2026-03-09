@@ -168,7 +168,7 @@
                 <h5 class="modal-title" id="uploadModalLabel">Subir Evidencia</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <form id="uploadForm" method="post" enctype="multipart/form-data">
+            <form id="uploadForm" method="post" enctype="multipart/form-data" novalidate>
                 <div class="modal-body">
                     <input type="hidden" id="modalFactorId" name="FactorId" />
                     <input type="hidden" id="modalQuarter" name="Quarter" />
@@ -189,10 +189,12 @@
                     <div class="mb-3">
                         <label id="file-input-label" for="fileUploadInput" class="form-label"><strong>Archivos de Evidencia</strong></label>
                         <input type="file" id="fileUploadInput" class="form-control" multiple />
+                        <span id="filesError" class="text-danger small"></span>
                     </div>
                     <div class="mb-3">
                         <label for="percentage" class="form-label"><strong>Porcentaje de Avance del Trimestre (%)</strong></label>
-                        <input type="number" id="modalPercentage" name="Percentage" class="form-control" min="1" max="100" required />
+                        <input type="number" id="modalPercentage" name="Percentage" class="form-control" min="1" max="100" />
+                        <span id="percentageError" class="text-danger small"></span>
                     </div>
                     <div class="mb-3">
                         <label for="comment" class="form-label"><strong>Comentario (Opcional)</strong></label>
@@ -240,6 +242,9 @@
         fileInput.addEventListener('change', function(event) {
             stagedFiles.push(...event.target.files);
             renderStagedFiles();
+
+            document.getElementById("filesError").textContent = "";
+
             event.target.value = '';
         });
 
@@ -295,33 +300,73 @@
         uploadForm.addEventListener('submit', function(event) {
             event.preventDefault();
 
+            // limpiar mensajes
+            document.getElementById("percentageError").textContent = "";
+            document.getElementById("filesError").textContent = "";
+
+            let hasError = false;
+
+            const percentageInput = document.getElementById("modalPercentage");
+            const percentageValue = percentageInput.value.trim();
+
+            // validar que no esté vacío
+            if (percentageValue === "") {
+                document.getElementById("percentageError").textContent = "El porcentaje es obligatorio.";
+                hasError = true;
+            }
+            else if (parseInt(percentageValue) === 0) {
+                document.getElementById("percentageError").textContent = "El porcentaje debe ser mayor a 0.";
+                hasError = true;
+            }
+
+            // validar archivos
+            if (stagedFiles.length === 0 && existingFilesList.children.length === 0) {
+                document.getElementById("filesError").textContent = "Debe seleccionar al menos un archivo.";
+                hasError = true;
+            }
+
+            if (hasError) {
+                return;
+            }
+
             const formData = new FormData(uploadForm);
             stagedFiles.forEach(file => formData.append('Files', file));
 
             const submitButton = uploadForm.querySelector('button[type="submit"]');
             submitButton.disabled = true;
-            submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...`;
+            submitButton.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Guardando...`;
 
             fetch('/Ptar/SaveDraft', {
                 method: 'POST',
                 body: formData,
-                headers: { 'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value }
+                headers: {
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                }
             })
             .then(response => response.json())
             .then(data => {
+
                 if (data.success) {
                     window.location.reload();
-                } else {
-                    alert('Error: ' + (data.message || 'No se pudo guardar el borrador.'));
-                    submitButton.disabled = false;
-                    submitButton.textContent = 'Guardar Borrador';
+                    return;
                 }
+
+                if (data.field === "percentage") {
+                    document.getElementById("percentageError").textContent = data.message;
+                }
+                else if (data.field === "files") {
+                    document.getElementById("filesError").textContent = data.message;
+                }
+                else {
+                    alert(data.message || "Ocurrió un error.");
+                }
+
+                submitButton.disabled = false;
+                submitButton.textContent = "Guardar Borrador";
             })
             .catch(error => {
-                console.error('Error:', error);
-                alert('Ocurrió un error de red. Inténtalo de nuevo.');
-                submitButton.disabled = false;
-                submitButton.textContent = 'Guardar Borrador';
+                console.error("Error real:", error);
+                alert("Problema de red.");
             });
         });
 
