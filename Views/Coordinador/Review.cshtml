@@ -4,10 +4,9 @@
 }
 
 @section HeaderButtons {
-    <a class="btn" style="background-color: #00A987; color: white;" asp-action="Index">🔙Volver</a>
+    <a class="btn" style="background-color: #00A987; color: white;" asp-action="Index"><i class="fa-solid fa-arrow-left"></i> Volver</a>
 }
 
-@* Mostramos los mensajes de TempData que puedan llegar del controlador *@
 @if (TempData["SuccessMessage"] != null)
 {
     <div class="alert alert-success">@TempData["SuccessMessage"]</div>
@@ -62,13 +61,11 @@
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 @if (file.OriginalFileName.StartsWith("[C]_"))
                                 {
-                                    // Si tiene la marca, mostramos el mensaje y el nombre limpio
                                     <a href="~/@file.StoragePath" target="_blank">@file.OriginalFileName.Substring(4)</a>
                                     <span class="badge bg-info text-dark">Añadido por el Coordinador</span>
                                 }
                                 else
                                 {
-                                    // Si no, lo mostramos normal
                                     <a href="~/@file.StoragePath" target="_blank">@file.OriginalFileName</a>
                                 }
                             </li>

@@ -16,6 +16,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+
     <style>
         body {
             font-family: 'Poppins', sans-serif;
@@ -41,9 +42,9 @@
             text-decoration: none;
         }
 
-        .header-brand img {
-            height: 40px;
-        }
+            .header-brand img {
+                height: 40px;
+            }
 
         .user-bar {
             background-color: #FFFFFF;
@@ -70,21 +71,32 @@
             gap: 0.5rem;
         }
 
-        .dashboard-buttons .btn, .btn-logout {
-            font-weight: 600;
-            color: white;
-            border: none;
-            transition: filter 0.2s ease-in-out;
+            .dashboard-buttons .btn, .btn-logout {
+                font-weight: 600;
+                color: white;
+                border: none;
+                transition: filter 0.2s ease-in-out;
+            }
+
+                .dashboard-buttons .btn:hover, .btn-logout:hover {
+                    filter: brightness(90%);
+                }
+
+        .btn-logout {
+            background-color: #737373;
         }
 
-        .dashboard-buttons .btn:hover, .btn-logout:hover {
-            filter: brightness(90%);
+        .btn-usuarios {
+            background-color: #00A987;
         }
 
-        .btn-logout { background-color: #737373; }
-        .btn-usuarios { background-color: #00A987; }
-        .btn-ptci { background-color: #D4693B; }
-        .btn-ptar { background-color: #0887A0; }
+        .btn-ptci {
+            background-color: #D4693B;
+        }
+
+        .btn-ptar {
+            background-color: #0887A0;
+        }
 
         footer {
             text-align: center;
@@ -94,13 +106,15 @@
             padding-bottom: 1rem;
         }
 
-        footer p { margin: 4px 0; }
+            footer p {
+                margin: 4px 0;
+            }
 
-        footer a {
-            color: #1ab192;
-            text-decoration: none;
-            font-weight: bold;
-        }
+            footer a {
+                color: #1ab192;
+                text-decoration: none;
+                font-weight: bold;
+            }
 
         media (max-width: 768px) {
             .main-header {
@@ -124,6 +138,7 @@
             }
         }
     </style>
+
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
@@ -133,7 +148,7 @@
                 <img src="~/images/logo_uttn2.png" alt="Logo UTTN" />
                 <span>Sistema de Control Interno Institucional</span>
             </a>
-            <a class="btn btn-logout btn-sm" asp-controller="Account" asp-action="Logout">Cerrar Sesión</a>
+            <a class="btn btn-danger btn-sm" asp-controller="Account" asp-action="Logout"><i class="fa-solid fa-right-to-bracket"></i> Cerrar Sesión</a>
         </div>
         <div class="user-bar">
             <div class="user-info">
@@ -147,19 +162,19 @@
                 }
                 else if (roleName == "Coordinador" || roleName == "Superadmin")
                 {
-                    <a class="btn btn-sm btn-usuarios" asp-controller="Users" asp-action="Index">USUARIOS</a>
-                    <a class="btn btn-sm btn-ptci" asp-controller="Ptci" asp-action="Index">PANEL PTCI</a>
-                    <a class="btn btn-sm btn-ptar" asp-controller="Ptar" asp-action="Index">PANEL PTAR</a>
+                    <a class="btn btn-sm btn-usuarios" asp-controller="Users" asp-action="Index"><i class="fa-solid fa-users"></i> USUARIOS</a>
+                    <a class="btn btn-sm btn-ptci" asp-controller="Ptci" asp-action="Index"><i class="fa-regular fa-rectangle-list"></i> PANEL PTCI</a>
+                    <a class="btn btn-sm btn-ptar" asp-controller="Ptar" asp-action="Index"><i class="fa-solid fa-file-circle-exclamation"></i> PANEL PTAR</a>
                 }
                 else if (roleName == "Enlace")
                 {
                     @if (hasPtciTasks)
                     {
-                        <a class="btn btn-sm btn-ptci" asp-controller="Ptci" asp-action="Index">PANEL PTCI</a>
+                        <a class="btn btn-sm btn-ptci" asp-controller="Ptci" asp-action="Index"><i class="fa-regular fa-rectangle-list"></i> PANEL PTCI</a>
                     }
                     @if (hasPtarTasks)
                     {
-                        <a class="btn btn-sm btn-ptar" asp-controller="Ptar" asp-action="Index">PANEL PTAR</a>
+                        <a class="btn btn-sm btn-ptar" asp-controller="Ptar" asp-action="Index"><i class="fa-solid fa-file-circle-exclamation"></i> sPANEL PTAR</a>
                     }
                 }
             </div>
