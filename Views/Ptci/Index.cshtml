@@ -9,38 +9,34 @@
 
 <style>
     body {
-        font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
         background-color: #f4f6f9;
         overflow-y: auto;
         overflow-x: hidden;
         padding-bottom: 40px;
     }
 
-    .header-container {
-        background-color: #ffffff;
-        padding: 2rem 1rem;
-        margin-bottom: 2rem;
-        border-radius: 0 0 15px 15px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-        text-align: center;
-        border-bottom: 1px solid #eaeaea;
+    .btn-custom {
+        background-color: #00A987;
+        border-color: #00A987;
+        color: white;
+        transition: all 0.2s ease;
     }
 
-    .header-title {
-        color: #2c3e50;
-        font-weight: 600;
-        margin: 0;
-        font-size: 1.75rem;
-    }
+        .btn-custom:hover {
+            background-color: #008f72;
+            border-color: #008f72;
+            color: white;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
 
     #realTableContainer {
         width: 100%;
         overflow-x: auto;
         scrollbar-width: none;
         -ms-overflow-style: none;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
         background: white;
+        border-radius: 0 0 5px 5px;
     }
 
         #realTableContainer::-webkit-scrollbar {
@@ -48,8 +44,8 @@
         }
 
     table {
-        min-width: 2200px;
-        font-size: 0.85rem;
+        min-width: 2800px;
+        font-size: 0.80rem;
         background-color: white;
         border-collapse: separate;
         border-spacing: 0;
@@ -57,29 +53,33 @@
     }
 
     th, td {
-        padding: 12px 10px;
+        padding: 10px;
         border-bottom: 1px solid #eee;
         border-right: 1px solid #f0f0f0;
     }
 
-    .sticky-th {
+        th:last-child, td:last-child {
+            padding-right: 60px;
+        }
+
+    .sticky-th, .sticky-th-2 {
         position: sticky;
-        top: 0;
         background-color: #eff3f8;
+        border-bottom: 2px solid #dde2e6;
+    }
+
+    .sticky-th {
+        top: 0;
         color: #495057;
         font-weight: 700;
         z-index: 100;
-        border-bottom: 2px solid #dde2e6;
         text-transform: uppercase;
         font-size: 0.75rem;
     }
 
     .sticky-th-2 {
-        position: sticky;
         top: 45px;
-        background-color: #eff3f8;
         z-index: 90;
-        border-bottom: 2px solid #dde2e6;
     }
 
     tbody tr:hover {
@@ -92,6 +92,10 @@
 
     .text-center {
         text-align: center !important;
+    }
+
+    .no-wrap {
+        white-space: nowrap;
     }
 
     .floating-scrollbar {
@@ -128,7 +132,7 @@
         align-items: center;
         justify-content: center;
         z-index: 9999;
-        background: #0d6efd;
+        background: #00A987;
         color: white;
         border: none;
         box-shadow: 0 4px 10px rgba(0,0,0,0.3);
@@ -139,129 +143,131 @@
 @section HeaderButtons {
     @if (roleName == "Coordinador" || roleName == "Superadmin")
     {
-        <a class="btn btn-primary shadow-sm" asp-action="Create"><i class="fas fa-plus"></i> Agregar Elemento</a>
-        <a class="btn shadow-sm" style="background-color: #E03E1A; color: white;" asp-action="ExportToPdf"><i class="fas fa-file-pdf"></i> PDF</a>
-        <a class="btn shadow-sm" style="background-color: #247147; color: white;" asp-action="ExportToExcel"><i class="fas fa-file-excel"></i> Excel</a>
+        <a class="btn btn-primary shadow-sm" asp-action="Create"><i class="fa-solid fa-file-circle-plus"></i> Agregar Elemento</a>
+        <a class="btn shadow-sm" style="background-color: #E03E1A; color: white;" asp-action="ExportToPdf"><i class="fas fa-file-pdf"></i> Exportar a PDF</a>
+        <a class="btn shadow-sm" style="background-color: #247147; color: white;" asp-action="ExportToExcel"><i class="fas fa-file-excel"></i> Exportar a Excel</a>
     }
-    <a class="btn btn-secondary shadow-sm" asp-controller="@homeController" asp-action="Index"><i class="fas fa-arrow-left"></i> Volver</a>
+    <a class="btn btn-custom shadow-sm" asp-controller="@homeController" asp-action="Index"><i class="fas fa-arrow-left"></i> Volver</a>
 }
 
-<div class="header-container">
-    <h1 class="header-title">Panel de Trabajo de Control Interno (PTCI)</h1>
-</div>
-
-<div class="table-responsive card shadow-sm border-0" id="realTableContainer">
-    <table class="table table-hover mb-0" id="mainTable">
-        <thead class="text-center align-middle">
-            <tr>
-                <th rowspan="2" class="sticky-th">NGCI</th>
-                <th rowspan="2" class="sticky-th">No.</th>
-                <th rowspan="2" class="sticky-th">Elemento</th>
-                <th rowspan="2" class="sticky-th">Proceso</th>
-                <th rowspan="2" class="sticky-th">No.</th>
-                <th rowspan="2" class="sticky-th">Acción Mejora</th>
-                <th rowspan="2" class="sticky-th">Unidad</th>
-                <th rowspan="2" class="sticky-th">Responsable</th>
-                <th rowspan="2" class="sticky-th">Inicio</th>
-                <th rowspan="2" class="sticky-th">Término</th>
-                <th rowspan="2" class="sticky-th">Medios Verificación</th>
-                <th rowspan="2" class="sticky-th">Avance</th>
-                <th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">1er Trim</th>
-                <th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">2do Trim</th>
-                <th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">3er Trim</th>
-                <th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">4to Trim</th>
-                <th rowspan="2" class="sticky-th">Acción</th>
-            </tr>
-            <tr>
-                @for (int i = 0; i < 4; i++)
-                {
-                    <th class="sticky-th-2">Enl.</th>
-                    @if (roleName != "Enlace")
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-4 border-bottom text-center">
+        <h1 class="m-0" style="color: #2c3e50; font-weight: 600; font-size: 1.75rem;">Panel de Trabajo de Control Interno (PTCI)</h1>
+        <br>
+    </div>
+    <div class="table-responsive" id="realTableContainer">
+        <table class="table table-hover mb-0" id="mainTable">
+            <thead class="text-center align-middle">
+                <tr>
+                    <th rowspan="2" class="sticky-th">NGCI</th>
+                    <th rowspan="2" class="sticky-th">No.</th>
+                    <th rowspan="2" class="sticky-th">Elemento</th>
+                    <th rowspan="2" class="sticky-th">Proceso</th>
+                    <th rowspan="2" class="sticky-th">No.</th>
+                    <th rowspan="2" class="sticky-th">Acción Mejora</th>
+                    <th rowspan="2" class="sticky-th">Unidad</th>
+                    <th rowspan="2" class="sticky-th">Responsable</th>
+                    <th rowspan="2" class="sticky-th">Inicio</th>
+                    <th rowspan="2" class="sticky-th">Término</th>
+                    <th rowspan="2" class="sticky-th">Medios Verificación</th>
+                    <th rowspan="2" class="sticky-th">Avance</th>
+                    <th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">1er Trim</th>
+                    <th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">2do Trim</th>
+                    <th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">3er Trim</th>
+                    <th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">4to Trim</th>
+                    <th rowspan="2" class="sticky-th">Acción</th>
+                </tr>
+                <tr>
+                    @for (int i = 0; i < 4; i++)
                     {
-                        <th class="sticky-th-2">Com.</th>
+                        <th class="sticky-th-2">Enl.</th>
+                        @if (roleName != "Enlace")
+                        {
+                            <th class="sticky-th-2">Com.</th>
+                        }
                     }
-                }
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var element in Model)
-            {
-                var actions = element.ImprovementActionsPtcis.ToList();
-                var rowSpanCount = actions.Any() ? actions.Count : 1;
-                if (actions.Any())
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var element in Model)
                 {
-                    for (int i = 0; i < actions.Count; i++)
+                    var actions = element.ImprovementActionsPtcis.ToList();
+                    var rowSpanCount = actions.Any() ? actions.Count : 1;
+                    if (actions.Any())
                     {
-                        var action = actions[i];
-                        var grades = new[] { action.Quarter1Grade, action.Quarter2Grade, action.Quarter3Grade, action.Quarter4Grade };
-                        var realProgress = grades.Any(g => g.HasValue) ? grades.Where(g => g.HasValue).Average(g => g.Value) : 0;
-                        <tr>
-                            @if (i == 0)
-                            {
-                                <td rowspan="@rowSpanCount" class="align-middle fw-bold text-center">@element.Ngci</td>
-                                <td rowspan="@rowSpanCount" class="align-middle text-center">@element.ControlNumber</td>
-                                <td rowspan="@rowSpanCount" class="align-middle" style="min-width: 200px;">@element.ControlElement</td>
-                            }
-                            <td style="min-width: 150px;">@action.Process</td>
-                            <td class="text-center">@action.ActionNumber</td>
-                            <td style="min-width: 250px;">@action.ImprovementAction</td>
-                            <td style="min-width: 120px;">@action.Unit?.UnitName</td>
-                            <td style="min-width: 150px;">@(action.ResponsibleUser != null ? $"{action.ResponsibleUser.FirstName} {action.ResponsibleUser.LastName}" : "")</td>
-                            <td class="text-center">@action.StartDate?.ToString("dd/MM/yyyy")</td>
-                            <td class="text-center">@action.EndDate?.ToString("dd/MM/yyyy")</td>
-                            <td style="min-width: 200px;">@action.VerificationMeans</td>
-                            <td class="align-middle">
-                                <div class="d-flex align-items-center gap-2" style="min-width: 100px;">
-                                    <div class="progress flex-grow-1" style="height: 6px;">
-                                        <div class="progress-bar @(realProgress < 100 ? "bg-info" : "bg-success")" style="width: @realProgress.ToString("F0")%"></div>
-                                    </div>
-                                    <span class="small fw-bold">@realProgress.ToString("F0")%</span>
-                                </div>
-                            </td>
-                            <td class="text-center fw-bold text-primary">@(action.Quarter1Grade.HasValue ? $"{action.Quarter1Grade:F0}%" : "")</td>
-                            @if (roleName != "Enlace")
-                            {
-                                <td class="text-center text-secondary">@(action.Quarter1GradeOic.HasValue ? $"{action.Quarter1GradeOic:F0}%" : "")</td>
-                            }
-                            <td class="text-center fw-bold text-primary">@(action.Quarter2Grade.HasValue ? $"{action.Quarter2Grade:F0}%" : "")</td>
-                            @if (roleName != "Enlace")
-                            {
-                                <td class="text-center text-secondary">@(action.Quarter2GradeOic.HasValue ? $"{action.Quarter2GradeOic:F0}%" : "")</td>
-                            }
-                            <td class="text-center fw-bold text-primary">@(action.Quarter3Grade.HasValue ? $"{action.Quarter3Grade:F0}%" : "")</td>
-                            @if (roleName != "Enlace")
-                            {
-                                <td class="text-center text-secondary">@(action.Quarter3GradeOic.HasValue ? $"{action.Quarter3GradeOic:F0}%" : "")</td>
-                            }
-                            <td class="text-center fw-bold text-primary">@(action.Quarter4Grade.HasValue ? $"{action.Quarter4Grade:F0}%" : "")</td>
-                            @if (roleName != "Enlace")
-                            {
-                                <td class="text-center text-secondary">@(action.Quarter4GradeOic.HasValue ? $"{action.Quarter4GradeOic:F0}%" : "")</td>
-                            }
-                            @if (i == 0)
-                            {
-                                <td rowspan="@rowSpanCount" class="text-center align-middle">
-                                    @if (roleName == "Coordinador" || roleName == "Superadmin")
-                                    {
-                                        <div class="d-flex justify-content-center gap-2">
-                                            <a asp-action="Edit" asp-route-id="@element.ElementId" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
-                                            <form asp-action="Delete" asp-route-id="@element.ElementId" method="post" onsubmit="return confirm('¿Eliminar?');">
-                                                <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i></button>
-                                            </form>
+                        for (int i = 0; i < actions.Count; i++)
+                        {
+                            var action = actions[i];
+                            var grades = new[] { action.Quarter1Grade, action.Quarter2Grade, action.Quarter3Grade, action.Quarter4Grade };
+                            var realProgress = grades.Any(g => g.HasValue) ? grades.Where(g => g.HasValue).Average(g => g.Value) : 0;
+                            <tr>
+                                @if (i == 0)
+                                {
+                                    <td rowspan="@rowSpanCount" class="align-middle fw-bold text-center">@element.Ngci</td>
+                                    <td rowspan="@rowSpanCount" class="align-middle text-center">@element.ControlNumber</td>
+                                    <td rowspan="@rowSpanCount" class="align-middle" style="min-width: 200px;">@element.ControlElement</td>
+                                }
+                                <td style="min-width: 150px;">@action.Process</td>
+                                <td class="text-center">@action.ActionNumber</td>
+                                <td style="min-width: 250px;">@action.ImprovementAction</td>
+                                <td style="min-width: 120px;">@action.Unit?.UnitName</td>
+                                <td style="min-width: 150px;" class="no-wrap">@(action.ResponsibleUser != null ? $"{action.ResponsibleUser.FirstName} {action.ResponsibleUser.LastName}" : "")</td>
+                                <td class="text-center no-wrap">@action.StartDate?.ToString("dd/MM/yyyy")</td>
+                                <td class="text-center no-wrap">@action.EndDate?.ToString("dd/MM/yyyy")</td>
+                                <td style="min-width: 200px;">@action.VerificationMeans</td>
+                                <td class="align-middle">
+                                    <div class="d-flex align-items-center gap-2" style="min-width: 100px;">
+                                        <div class="progress flex-grow-1" style="height: 6px;">
+                                            <div class="progress-bar @(realProgress < 100 ? "bg-info" : "bg-success")" style="width: @realProgress.ToString("F0")%"></div>
                                         </div>
-                                    }
-                                    else if (roleName == "Enlace")
-                                    {
-                                        <a asp-action="Upload" asp-route-id="@element.ElementId" class="btn btn-sm btn-success"><i class="fas fa-upload"></i> Evidencia</a>
-                                    }
+                                        <span class="small fw-bold">@realProgress.ToString("F0")%</span>
+                                    </div>
                                 </td>
-                            }
-                        </tr>
+                                <td class="text-center fw-bold text-primary">@(action.Quarter1Grade.HasValue ? $"{action.Quarter1Grade:F0}%" : "")</td>
+                                @if (roleName != "Enlace")
+                                {
+                                    <td class="text-center text-secondary">@(action.Quarter1GradeOic.HasValue ? $"{action.Quarter1GradeOic:F0}%" : "")</td>
+                                }
+                                <td class="text-center fw-bold text-primary">@(action.Quarter2Grade.HasValue ? $"{action.Quarter2Grade:F0}%" : "")</td>
+                                @if (roleName != "Enlace")
+                                {
+                                    <td class="text-center text-secondary">@(action.Quarter2GradeOic.HasValue ? $"{action.Quarter2GradeOic:F0}%" : "")</td>
+                                }
+                                <td class="text-center fw-bold text-primary">@(action.Quarter3Grade.HasValue ? $"{action.Quarter3Grade:F0}%" : "")</td>
+                                @if (roleName != "Enlace")
+                                {
+                                    <td class="text-center text-secondary">@(action.Quarter3GradeOic.HasValue ? $"{action.Quarter3GradeOic:F0}%" : "")</td>
+                                }
+                                <td class="text-center fw-bold text-primary">@(action.Quarter4Grade.HasValue ? $"{action.Quarter4Grade:F0}%" : "")</td>
+                                @if (roleName != "Enlace")
+                                {
+                                    <td class="text-center text-secondary">@(action.Quarter4GradeOic.HasValue ? $"{action.Quarter4GradeOic:F0}%" : "")</td>
+                                }
+                                @if (i == 0)
+                                {
+                                    <td rowspan="@rowSpanCount" class="text-center align-middle">
+                                        @if (roleName == "Coordinador" || roleName == "Superadmin")
+                                        {
+                                            <div class="d-flex justify-content-center gap-2">
+                                                <a asp-action="Edit" asp-route-id="@element.ElementId" class="btn btn-sm btn-outline-primary"><i class="fas fa-edit"></i></a>
+                                                <form asp-action="Delete" asp-route-id="@element.ElementId" method="post" onsubmit="return confirm('¿Eliminar?');">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-trash-alt"></i></button>
+                                                </form>
+                                            </div>
+                                        }
+                                        else if (roleName == "Enlace")
+                                        {
+                                            <a asp-action="Upload" asp-route-id="@element.ElementId" class="btn btn-sm btn-success"><i class="fas fa-upload"></i> Evidencia</a>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
                     }
                 }
-            }
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+    </div>
 </div>
 
 <div class="floating-scrollbar" id="fakeScrollContainer"><div style="height:1px;" id="fakeScrollContent"></div></div>

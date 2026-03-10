@@ -3,43 +3,131 @@
     ViewData["Title"] = "Agregar Elemento PTCI";
 }
 
-@section HeaderButtons {
-    <a class="btn" style="background-color: #00A987; color: white;" asp-action="Index">🔙Volver</a>
+@section Styles {
+    <style>
+        .card {
+            border: none;
+            border-radius: 10px;
+        }
+
+        .card-header {
+            background-color: #fff;
+            border-bottom: 1px solid #eaeaea;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+        }
+
+        .btn-custom {
+            background-color: #00A987;
+            border-color: #00A987;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+            .btn-custom:hover {
+                background-color: #008f72;
+                border-color: #008f72;
+                color: white;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            }
+
+        .btn-dashed {
+            border: 2px dashed #00A987;
+            color: #00A987;
+            background-color: transparent;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+            .btn-dashed:hover {
+                background-color: #e6f6f3;
+                color: #008f72;
+                border-color: #008f72;
+            }
+
+        .btn-outline-custom-cyan {
+            color: #00A987;
+            border-color: #00A987;
+            background-color: transparent;
+            transition: all 0.2s ease;
+        }
+
+            .btn-outline-custom-cyan:hover {
+                color: white;
+                background-color: #00A987;
+                border-color: #00A987;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+            }
+
+        .fadeInAnimation {
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @@keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 }
 
-<h1 class="display-6 mb-4">Agregar Nuevo Elemento PTCI</h1>
+@section HeaderButtons {
+    <a class="btn btn-custom shadow-sm" asp-action="Index">
+        <i class="fas fa-arrow-left me-1"></i> Volver
+    </a>
+}
 
 <form asp-action="Create" method="post" id="ptciForm">
     <div class="card shadow-sm mb-4">
-        <div class="card-header"><h5>Información del Elemento de Control</h5></div>
+        <div class="card-header py-3 bg-white text-center">
+            <h1 class="display-6 m-0" style="color: #333; font-weight: 500;">Agregar Nuevo Elemento (PTCI)</h1>
+            <br>
+            <hr class="mt-3 mb-3 mx-n3" />
+            <h5 class="text-secondary m-0 text-start" style="font-weight: 600; font-size: 1.1rem;">
+                <i class="fas fa-info-circle me-2"></i> Información del Elemento de Control
+            </h5>
+        </div>
         <div class="card-body">
             <div class="row">
                 <div class="col-md-6 mb-3">
                     <label asp-for="Ngci" class="form-label">NGCI *</label>
-                    <input asp-for="Ngci" class="form-control" required />
-                    <span asp-validation-for="Ngci" class="text-danger"></span>
+                    <input asp-for="Ngci" class="form-control bg-light" required />
+                    <span asp-validation-for="Ngci" class="text-danger small"></span>
                 </div>
                 <div class="col-md-6 mb-3">
                     <label asp-for="ControlNumber" class="form-label">No. Control *</label>
-                    <input asp-for="ControlNumber" class="form-control" required />
-                    <span asp-validation-for="ControlNumber" class="text-danger"></span>
+                    <input asp-for="ControlNumber" class="form-control bg-light" required />
+                    <span asp-validation-for="ControlNumber" class="text-danger small"></span>
                 </div>
             </div>
             <div class="mb-3">
                 <label asp-for="ControlElement" class="form-label">Elemento de Control *</label>
-                <textarea asp-for="ControlElement" class="form-control" rows="2" required></textarea>
-                <span asp-validation-for="ControlElement" class="text-danger"></span>
+                <textarea asp-for="ControlElement" class="form-control bg-light" rows="2" required></textarea>
+                <span asp-validation-for="ControlElement" class="text-danger small"></span>
             </div>
         </div>
     </div>
 
     <div id="actions-container"></div>
 
-    <div class="d-flex justify-content-between mt-4">
-        <button type="button" id="add-action-btn" class="btn btn-success">[+] Agregar Acción de Mejora</button>
-        <div>
-            <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
-            <button type="submit" class="btn btn-primary">Guardar Elemento</button>
+    <div class="card shadow-sm mb-0 sticky-bottom border-0 bg-white" style="z-index: 1000; bottom: 0;">
+        <div class="card-body d-flex gap-3 border-top p-3 align-items-center">
+            <button type="button" id="add-action-btn" class="btn btn-dashed flex-grow-1 py-2">
+                <i class="fas fa-plus-circle me-1"></i> Agregar Nueva Acción de Mejora
+            </button>
+            <a asp-action="Index" class="btn btn-sm btn-outline-danger"><i class="fas fa-times me-1"></i> Cancelar</a>
+            <button type="submit" class="btn btn-sm btn-outline-custom-cyan"><i class="fas fa-save me-1"></i> Guardar Cambios</button>
         </div>
     </div>
 </form>
@@ -58,12 +146,26 @@
             addNewAction();
         });
 
+        function generateOptions(optionsList) {
+            return optionsList.map(opt => `<option value="${opt.value}">${opt.text}</option>`).join('');
+        }
+
         function addNewAction() {
+            var actionNumber = actionIndex + 1;
             var actionHtml = `
-                <div class="card shadow-sm mb-4 action-card">
-                    <div class="card-header d-flex justify-content-between align-items-center">
-                        <h5>Acción de Mejora #${actionIndex + 1}</h5>
-                        <button type="button" class="btn-close" onclick="removeAction(this)"></button>
+                <div class="card shadow-sm mb-4 action-card fadeInAnimation">
+                    <div class="card-header d-flex justify-content-between align-items-center py-3 bg-light">
+                        <h5 class="text-secondary m-0 action-title" style="font-weight: 600; font-size: 1rem;">
+                            <i class="fas fa-list-ol me-2"></i> Acción de Mejora #${actionNumber}
+                        </h5>
+                        <div class="d-flex gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-custom-cyan" onclick="toggleAction(this)">
+                                <i class="fas fa-chevron-up"></i> Ocultar
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeAction(this)">
+                                <i class="fas fa-trash-alt"></i> Eliminar
+                            </button>
+                        </div>
                     </div>
                     <div class="card-body">
                         <div class="row">
@@ -118,17 +220,20 @@
             actionIndex++;
         }
 
-        function generateOptions(optionsList) {
-            var optionsHtml = '';
-            for (var i = 0; i < optionsList.length; i++) {
-                optionsHtml += `<option value="${optionsList[i].value}">${optionsList[i].text}</option>`;
-            }
-            return optionsHtml;
-        }
-
         function removeAction(button) {
             button.closest('.action-card').remove();
             reindexActions();
+        }
+
+        function toggleAction(button) {
+            var body = button.closest('.action-card').querySelector('.card-body');
+            if (body.style.display === 'none') {
+                body.style.display = 'block';
+                button.innerHTML = '<i class="fas fa-chevron-up"></i> Ocultar';
+            } else {
+                body.style.display = 'none';
+                button.innerHTML = '<i class="fas fa-chevron-down"></i> Mostrar';
+            }
         }
 
         function reindexActions() {
@@ -136,13 +241,18 @@
             actionIndex = 0;
 
             actionCards.forEach(function(card) {
-                card.querySelector('h5').textContent = `Acción de Mejora #${actionIndex + 1}`;
                 card.querySelectorAll('input, select, textarea').forEach(function(input) {
                     var oldName = input.name;
                     if (oldName) {
                         input.name = oldName.replace(/Actions\[\d+\]/, `Actions[${actionIndex}]`);
                     }
                 });
+
+                var titleElement = card.querySelector('.action-title');
+                if(titleElement) {
+                    titleElement.innerHTML = `<i class="fas fa-list-ol me-2"></i> Acción de Mejora #${actionIndex + 1}`;
+                }
+
                 actionIndex++;
             });
         }

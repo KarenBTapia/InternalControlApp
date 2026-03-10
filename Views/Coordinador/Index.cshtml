@@ -39,21 +39,30 @@
                 .nav-tabs .nav-link:hover {
                     background-color: #e2e6ea;
                     color: #333;
+                    box-shadow: 0 -4px 8px rgba(0,0,0,0.12);
                     z-index: 2;
                 }
 
                 .nav-tabs .nav-link.active {
-                    background: #00A987 0%;
+                    background: #00A987;
                     color: white !important;
                     border-color: #00A987;
                     z-index: 3;
+                    box-shadow: none;
                 }
-                 
-            .btn-gradient:hover {
-                box-shadow: 0 4px 6px rgba(0,0,0,0.15);
-                transform: translateY(-1px);
-                filter: brightness(1.1);
+
+        .btn-custom {
+            background-color: #00A987;
+            border-color: #00A987;
+            color: white;
+            transition: all 0.2s ease;
+        }
+
+            .btn-custom:hover {
+                background-color: #008f72;
+                border-color: #008f72;
                 color: white;
+                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
             }
 
         .btn-back-to-top {
@@ -63,6 +72,9 @@
             width: 50px;
             height: 50px;
             border-radius: 50%;
+            background-color: #00A987;
+            color: white;
+            border: none;
             display: none;
             align-items: center;
             justify-content: center;
@@ -72,14 +84,16 @@
             cursor: pointer;
         }
 
+        .badge-ptci, .badge-ptar {
+            color: white;
+        }
+
         .badge-ptci {
             background-color: #D4693B;
-            color: white;
         }
 
         .badge-ptar {
             background-color: #0887A0;
-            color: white;
         }
 
         .table thead {
@@ -91,37 +105,35 @@
             text-align: center;
         }
 
-        .toolbar-container {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            background-color: #f8f9fa;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-        .pagination-wrapper {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .page-size-input {
-            width: 70px;
-            text-align: center;
-        }
-
         .pagination {
             margin-bottom: 0;
         }
 
-        @@media (max-width: 768px) {
-            .d-none-mobile {
-                display: none !important;
+            .pagination .page-link {
+                color: #6c757d;
+                background-color: #f8f9fa;
+                border-color: #dee2e6;
+                font-weight: 600;
+                transition: all 0.2s ease;
             }
 
-            .btn-text {
-                display: none;
+                .pagination .page-link:hover {
+                    background-color: #e2e6ea;
+                    color: #333;
+                    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+                    z-index: 2;
+                }
+
+            .pagination .page-item.active .page-link {
+                background-color: #00A987;
+                border-color: #00A987;
+                color: white !important;
+                box-shadow: none;
+            }
+
+        @@media (max-width: 768px) {
+            .d-none-mobile, .btn-text {
+                display: none !important;
             }
 
             .nav-tabs .nav-link {
@@ -131,17 +143,10 @@
                 margin-bottom: -1px;
             }
 
-            .toolbar-container {
+            .pagination-container {
                 flex-direction: column;
-                gap: 10px;
+                align-items: stretch !important;
             }
-
-            .pagination-wrapper {
-                flex-direction: column;
-                gap: 10px;
-            }
-
-            
         }
     </style>
 }
@@ -166,21 +171,17 @@
                         <input type="text" name="searchString" value="@Model.CurrentSearch" class="form-control" placeholder="Usuario...">
                     </div>
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label class="form-label fw-bold small text-muted">DESDE</label>
                     <input type="date" name="reviewStartDate" value="@Model.ReviewStartDate?.ToString("yyyy-MM-dd")" class="form-control" />
                 </div>
-                <div class="col-md-2">
+                <div class="col-md-3">
                     <label class="form-label fw-bold small text-muted">HASTA</label>
                     <input type="date" name="reviewEndDate" value="@Model.ReviewEndDate?.ToString("yyyy-MM-dd")" class="form-control" />
                 </div>
                 <div class="col-md-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-primary w-100">
-                        <i class="fas fa-filter"></i> <span class="btn-text">Filtrar</span>
-                    </button>
-                    <a asp-action="Index" class="btn btn-outline-secondary" title="Limpiar">
-                        X
-                    </a>
+                    <button type="submit" class="btn btn-custom w-100"><i class="fas fa-filter"></i> <span class="btn-text">Filtrar</span></button>
+                    <a asp-action="Index" class="btn btn-outline-secondary" title="Limpiar"><i class="fas fa-times"></i></a>
                 </div>
             </div>
         </form>
@@ -207,27 +208,24 @@
         <div class="tab-content" id="dashboardTabsContent">
 
             <div class="tab-pane fade show active" id="pendientes" role="tabpanel" aria-labelledby="pendientes-tab">
-                <div class="toolbar-container bg-white">
-                    <div class="flex-grow-1"></div>
-                    <div class="pagination-wrapper">
-                        <form asp-action="Index" method="get" class="d-flex align-items-center">
-                            <input type="hidden" name="searchString" value="@Model.CurrentSearch" />
-                            <input type="hidden" name="reviewStartDate" value="@Model.ReviewStartDate?.ToString("yyyy-MM-dd")" />
-                            <input type="hidden" name="reviewEndDate" value="@Model.ReviewEndDate?.ToString("yyyy-MM-dd")" />
+                <div class="p-3 bg-white border-bottom d-flex justify-content-end align-items-center gap-3 pagination-container">
+                    <form asp-action="Index" method="get" class="d-flex align-items-center m-0">
+                        <input type="hidden" name="searchString" value="@Model.CurrentSearch" />
+                        <input type="hidden" name="reviewStartDate" value="@Model.ReviewStartDate?.ToString("yyyy-MM-dd")" />
+                        <input type="hidden" name="reviewEndDate" value="@Model.ReviewEndDate?.ToString("yyyy-MM-dd")" />
 
-                            <label class="me-2 small text-muted fw-bold">Mostrar:</label>
-                            <input type="number" name="pageSize" value="@currentPageSize" min="1" max="100" class="form-control form-control-sm page-size-input" onchange="this.form.submit()">
-                        </form>
+                        <label class="me-2 small text-muted fw-bold mb-0">Mostrar:</label>
+                        <input type="number" name="pageSize" value="@currentPageSize" min="1" max="100" class="form-control form-control-sm text-center" style="width: 70px;" onchange="this.form.submit()">
+                    </form>
 
-                        <div>
-                            @Html.PagedListPager(Model.PendientesDeRevisar, pagePendientes => Url.Action("Index", new { pagePendientes, searchString = Model.CurrentSearch, reviewStartDate = Model.ReviewStartDate, reviewEndDate = Model.ReviewEndDate, pageSize = currentPageSize }),
-                            new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" }, PageClasses = new string[] { "page-link" }, UlElementClasses = new string[] { "pagination pagination-sm" } })
-                        </div>
+                    <div class="m-0">
+                        @Html.PagedListPager(Model.PendientesDeRevisar, pagePendientes => Url.Action("Index", new { pagePendientes, searchString = Model.CurrentSearch, reviewStartDate = Model.ReviewStartDate, reviewEndDate = Model.ReviewEndDate, pageSize = currentPageSize }),
+                        new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" }, PageClasses = new string[] { "page-link" }, UlElementClasses = new string[] { "pagination pagination-sm m-0" } })
                     </div>
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table align-middle mb-0">
                         <thead class="table-light">
                             <tr>
                                 <th style="width: 80px;">Programa</th>
@@ -249,31 +247,21 @@
                                         <td><span class="badge @(esPtci ? "badge-ptci" : "badge-ptar")">@(esPtci ? "PTCI" : "PTAR")</span></td>
                                         <td class="d-none-mobile small text-muted">@(esPtci? item.ActionIdPtciNavigation?.Element?.ControlNumber : item.FactorIdPtarNavigation?.Risk?.RiskNumber)</td>
                                         <td class="fw-bold text-secondary">@item.User?.FirstName @item.User?.LastName</td>
-                                        <!--barra de progreso -->
                                         <td>
                                             <div class="progress mx-auto" style="height: 8px; width: 80px;">
                                                 <div class="progress-bar bg-info" style="width:5%"></div>
                                             </div>
                                             <small class="text-muted">5%</small>
                                         </td>
-                                        <!--Trimestre -->
                                         <td class="d-none-mobile small">@item.QuarterNumber</td>
                                         <td class="d-none-mobile small">@item.SubmissionDate.ToString("dd/MM/yyyy HH:mm")</td>
-                                        <td>
-                                            <a class="btn btn-sm px-3 btn-warning" asp-action="Review" asp-route-id="@item.DeliveryId">
-                                                <i class="fas fa-edit me-1"></i> Revisar
-                                            </a>
-                                        </td>
+                                        <td><a class="btn btn-sm px-3 btn-warning" asp-action="Review" asp-route-id="@item.DeliveryId"><i class="fas fa-edit me-1"></i> Revisar</a></td>
                                     </tr>
                                 }
                             }
                             else
                             {
-                                <tr>
-                                    <td colspan="6" class="text-center py-5 text-muted">
-                                        <i class="fas fa-inbox fa-2x mb-3 d-block"></i> No hay entregas pendientes de revisión.
-                                    </td>
-                                </tr>
+                                <tr><td colspan="7" class="text-center py-5 text-muted"><i class="fas fa-inbox fa-2x mb-3 d-block"></i> No hay entregas pendientes de revisión.</td></tr>
                             }
                         </tbody>
                     </table>
@@ -281,42 +269,36 @@
             </div>
 
             <div class="tab-pane fade" id="historial" role="tabpanel" aria-labelledby="historial-tab">
-                <div class="toolbar-container bg-light border-bottom">
+                <div class="p-3 bg-light border-bottom d-flex justify-content-between align-items-center flex-wrap gap-3">
                     <div class="d-flex gap-2">
-                        <a class="btn btn-sm btn-outline-info"
-                           asp-action="ExportHistoryToPdf"
-                           asp-route-searchString="@Model.CurrentSearch"
-                           asp-route-reviewStartDate="@Model.ReviewStartDate?.ToString("yyyy-MM-dd")"
-                           asp-route-reviewEndDate="@Model.ReviewEndDate?.ToString("yyyy-MM-dd")">
+                        <a class="btn btn-sm btn-outline-info" asp-action="ExportHistoryToPdf" asp-route-searchString="@Model.CurrentSearch" asp-route-reviewStartDate="@Model.ReviewStartDate?.ToString("yyyy-MM-dd")" asp-route-reviewEndDate="@Model.ReviewEndDate?.ToString("yyyy-MM-dd")">
                             <i class="fas fa-file-pdf"></i> <span class="d-none d-md-inline">Exportar PDF</span>
                         </a>
                         <form asp-action="HideReviewHistory" method="post" onsubmit="return confirm('¿Desea archivar el historial?');">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-sm btn-outline-danger">
-                                <i class="fas fa-archive"></i> <span class="d-none d-md-inline">Archivar</span>
-                            </button>
+                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-archive"></i> <span class="d-none d-md-inline">Archivar</span></button>
                         </form>
                     </div>
 
-                    <div class="pagination-wrapper mt-2 mt-md-0">
-                        <form asp-action="Index" method="get" class="d-flex align-items-center">
+                    <div class="d-flex align-items-center gap-3 pagination-container">
+                        <form asp-action="Index" method="get" class="d-flex align-items-center m-0">
                             <input type="hidden" name="searchString" value="@Model.CurrentSearch" />
                             <input type="hidden" name="reviewStartDate" value="@Model.ReviewStartDate?.ToString("yyyy-MM-dd")" />
                             <input type="hidden" name="reviewEndDate" value="@Model.ReviewEndDate?.ToString("yyyy-MM-dd")" />
 
-                            <label class="me-2 small text-muted fw-bold">Mostrar:</label>
-                            <input type="number" name="pageSize" value="@currentPageSize" min="1" max="100" class="form-control form-control-sm page-size-input" onchange="this.form.submit()">
+                            <label class="me-2 small text-muted fw-bold mb-0">Mostrar:</label>
+                            <input type="number" name="pageSize" value="@currentPageSize" min="1" max="100" class="form-control form-control-sm text-center" style="width: 70px;" onchange="this.form.submit()">
                         </form>
 
-                        <div>
+                        <div class="m-0">
                             @Html.PagedListPager(Model.HistorialDeRevisiones, pageHistorial => Url.Action("Index", new { pageHistorial, searchString = Model.CurrentSearch, reviewStartDate = Model.ReviewStartDate, reviewEndDate = Model.ReviewEndDate, pageSize = currentPageSize }),
-                            new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" }, PageClasses = new string[] { "page-link" }, UlElementClasses = new string[] { "pagination pagination-sm" } })
+                            new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" }, PageClasses = new string[] { "page-link" }, UlElementClasses = new string[] { "pagination pagination-sm m-0" } })
                         </div>
                     </div>
                 </div>
 
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
+                    <table class="table align-middle mb-0">
                         <thead class="table-light">
                             <tr>
                                 <th style="width: 80px;">Programa</th>
@@ -329,26 +311,25 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var item in Model.HistorialDeRevisiones)
+                            @if (Model.HistorialDeRevisiones != null && Model.HistorialDeRevisiones.Any())
                             {
-                                var esPtci = item.ActionIdPtci != null;
-                                <tr>
-                                    <td><span class="badge @(esPtci ? "badge-ptci" : "badge-ptar")">@(esPtci ? "PTCI" : "PTAR")</span></td>
-                                    <td class="d-none-mobile small text-muted">@(esPtci? item.ActionIdPtciNavigation?.Element?.ControlNumber : item.FactorIdPtarNavigation?.Risk?.RiskNumber)</td>
-                                    <td class="text-secondary">@item.User?.FirstName @item.User?.LastName</td>
-                                    <td class="d-none-mobile small">Primer trismestre</td>
-                                    <td class="d-none-mobile small">@item.ReviewDate?.ToString("dd/MM/yyyy HH:mm")</td>
-                                    <td><span class="badge @(item.Status == "Aprobado" ? "bg-success" : "bg-warning text-dark")">@item.Status</span></td>
-                                    <td>
-                                        <a class="btn btn-sm px-3 btn-warning" asp-action="Review" asp-route-id="@item.DeliveryId">
-                                            <i class="fas fa-eye me-1"></i> Revisar
-                                        </a>
-                                    </td>
-                                </tr>
+                                foreach (var item in Model.HistorialDeRevisiones)
+                                {
+                                    var esPtci = item.ActionIdPtci != null;
+                                    <tr>
+                                        <td><span class="badge @(esPtci ? "badge-ptci" : "badge-ptar")">@(esPtci ? "PTCI" : "PTAR")</span></td>
+                                        <td class="d-none-mobile small text-muted">@(esPtci? item.ActionIdPtciNavigation?.Element?.ControlNumber : item.FactorIdPtarNavigation?.Risk?.RiskNumber)</td>
+                                        <td class="text-secondary">@item.User?.FirstName @item.User?.LastName</td>
+                                        <td class="d-none-mobile small">@item.QuarterNumber</td>
+                                        <td class="d-none-mobile small">@item.ReviewDate?.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td><span class="badge @(item.Status == "Aprobado" ? "bg-success" : "bg-warning text-dark")">@item.Status</span></td>
+                                        <td><a class="btn btn-sm px-3 btn-warning" asp-action="Review" asp-route-id="@item.DeliveryId"><i class="fas fa-eye me-1"></i> Revisar</a></td>
+                                    </tr>
+                                }
                             }
-                            @if (!Model.HistorialDeRevisiones.Any())
+                            else
                             {
-                                <tr><td colspan="6" class="text-center py-5 text-muted">No se encontraron registros en el historial.</td></tr>
+                                <tr><td colspan="7" class="text-center py-5 text-muted">No se encontraron registros en el historial.</td></tr>
                             }
                         </tbody>
                     </table>
@@ -359,39 +340,22 @@
     </div>
 </div>
 
-<button onclick="scrollToTop()" id="backToTopBtn" class="btn-gradient btn-back-to-top" title="Ir arriba">
-    <i class="fas fa-arrow-up"></i>
-</button>
+<button onclick="scrollToTop()" id="backToTopBtn" class="btn-back-to-top" title="Ir arriba"><i class="fas fa-arrow-up"></i></button>
 
 @section Scripts {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <script>
-        $(document).ready(function() {
-            var activeTab = localStorage.getItem('activeDashboardTab');
-            if (activeTab) {
-                var tabTrigger = new bootstrap.Tab(document.querySelector(activeTab));
-                tabTrigger.show();
-            }
-            var tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
-            tabEls.forEach(function(tabEl) {
-                tabEl.addEventListener('shown.bs.tab', function (event) {
-                    var targetId = event.target.getAttribute('data-bs-target');
-                    var buttonSelector = targetId === '#pendientes' ? '#pendientes-tab' : '#historial-tab';
-                    localStorage.setItem('activeDashboardTab', buttonSelector);
-                });
+        $(function() {
+            const activeTab = localStorage.getItem('activeDashboardTab');
+            if (activeTab) new bootstrap.Tab(document.querySelector(activeTab)).show();
+
+            $('button[data-bs-toggle="tab"]').on('shown.bs.tab', e => {
+                const isPendientes = $(e.target).data('bs-target') === '#pendientes';
+                localStorage.setItem('activeDashboardTab', isPendientes ? '#pendientes-tab' : '#historial-tab');
             });
 
-            $(window).scroll(function() {
-                if ($(this).scrollTop() > 100) {
-                    $('#backToTopBtn').fadeIn();
-                } else {
-                    $('#backToTopBtn').fadeOut();
-                }
-            });
+            $(window).scroll(function() { $('#backToTopBtn').toggle($(this).scrollTop() > 100); });
         });
-
-        function scrollToTop() {
-            window.scrollTo({top: 0, behavior: 'smooth'});
-        }
+        const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'auto' });
     </script>
 }
