@@ -3,10 +3,13 @@ using Microsoft.EntityFrameworkCore;
 using Rotativa.AspNetCore;
 using InternalControlApp.Services;
 
-
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(options =>
+{
+    options.Filters.Add(new NoCacheAttribute());
+});
+
 builder.Services.AddSingleton<PasswordHasher>();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddHttpContextAccessor();
@@ -30,6 +33,13 @@ if (!app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+app.Use(async (context, next) =>
+{
+    context.Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate, max-age=0";
+    context.Response.Headers["Pragma"] = "no-cache";
+    context.Response.Headers["Expires"] = "-1";
+    await next();
+});
 app.UseRouting();
 app.UseSession();
 app.UseAuthorization();
@@ -38,9 +48,6 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Account}/{action=Index}/{id?}");
 
-
 RotativaConfiguration.Setup(app.Environment.WebRootPath, "Rotativa");
-
-
 
 app.Run();
