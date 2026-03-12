@@ -274,6 +274,12 @@
 <button onclick="scrollToTop()" id="backToTopBtn" class="btn-back-to-top"><i class="fas fa-arrow-up"></i></button>
 
 <script>
+    window.addEventListener("pageshow", function (event) {
+        var historyTraversal = event.persisted || (typeof window.performance != "undefined" && window.performance.getEntriesByType("navigation")[0].type === "back_foward");
+        if (historyTraversal) {
+            window.location.reload();
+        }
+    });
     document.addEventListener("DOMContentLoaded", () => {
         const tableContainer = document.getElementById("realTableContainer");
         const table = document.getElementById("mainTable");

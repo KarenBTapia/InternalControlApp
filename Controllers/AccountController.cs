@@ -24,6 +24,7 @@ namespace InternalControlApp.Controllers
         public IActionResult Logout()
         {
             HttpContext.Session.Clear();
+            Response.Cookies.Delete("SesionActiva", new CookieOptions { Path = "/" });
             return RedirectToAction("Index", "Account");
         }
 
@@ -42,6 +43,8 @@ namespace InternalControlApp.Controllers
                     HttpContext.Session.SetString("UserId", user.UserId.ToString());
                     HttpContext.Session.SetString("FullName", $"{user.FirstName} {user.LastName}");
                     HttpContext.Session.SetString("RoleName", user.Role.RoleName);
+
+                    Response.Cookies.Append("SesionActiva", "true", new CookieOptions { HttpOnly = false, Path = "/" });
 
                     if (user.Role.RoleName == "Enlace")
                     {
