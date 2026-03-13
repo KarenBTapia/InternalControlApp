@@ -5,10 +5,7 @@ using InternalControlApp.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddControllersWithViews(options =>
-{
-    options.Filters.Add(new NoCacheAttribute());
-});
+builder.Services.AddControllersWithViews();
 
 builder.Services.AddSingleton<PasswordHasher>();
 builder.Services.AddDistributedMemoryCache();
