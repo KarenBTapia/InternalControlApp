@@ -54,12 +54,15 @@
 
 <div class="card shadow-sm mb-4">
     <div class="card-header py-3 bg-white">
-        <form asp-action="Index" method="get" class="m-0">
+        <form asp-controller="Users" asp-action="Index" method="post" class="m-0">
             <div class="row">
                 <div class="col-md-6 col-lg-4">
                     <div class="input-group shadow-sm">
-                        <span class="input-group-text bg-white border-end-0"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" class="form-control border-start-0 ps-0" placeholder="Buscar por apellidos...">
+                        <span class="input-group-text bg-white border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" name="searchString" value="@ViewData["CurrentFilter"]" class="form-control border-start-0 ps-0" placeholder="Buscar por apellidos...">
+                
                         <button type="submit" class="btn btn-custom px-4">Buscar</button>
                     </div>
                 </div>
