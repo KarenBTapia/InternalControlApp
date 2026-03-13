@@ -22,26 +22,43 @@ namespace InternalControlApp.Controllers
         {
             var roleName = HttpContext.Session.GetString("RoleName");
             var userIdString = HttpContext.Session.GetString("UserId");
-
             return !string.IsNullOrEmpty(roleName) && !string.IsNullOrEmpty(userIdString);
         }
 
+        // --- ACCIÓN PARA CARGA INICIAL (GET) ---
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            if (!IsSessionValid()) return RedirectToAction("Index", "Account");
+            return await GetUsersFiltered(null);
+        }
+
+        // --- ACCIÓN PARA BÚSQUEDA (POST) ---
+        // Esto evita que searchString aparezca en la URL
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(string searchString)
         {
-            // --- VALIDACIÓN DE SESIÓN ---
             if (!IsSessionValid()) return RedirectToAction("Index", "Account");
+            return await GetUsersFiltered(searchString);
+        }
 
+        // Método privado para centralizar la lógica de consulta
+        private async Task<IActionResult> GetUsersFiltered(string searchString)
+        {
             var roleName = HttpContext.Session.GetString("RoleName");
             ViewData["CurrentFilter"] = searchString;
 
             IQueryable<User> usersQuery = _context.Users.Include(u => u.Role);
 
+            // Filtro por jerarquía de rol
             if (roleName == "Coordinador")
             {
                 usersQuery = usersQuery.Where(u => u.Role.RoleName != "Coordinador" && u.Role.RoleName != "Superadmin");
             }
 
-            if (!String.IsNullOrEmpty(searchString))
+            // Filtro de búsqueda por nombre/apellido
+            if (!string.IsNullOrEmpty(searchString))
             {
                 var searchLower = searchString.ToLower();
                 usersQuery = usersQuery.Where(u =>
@@ -50,9 +67,12 @@ namespace InternalControlApp.Controllers
                 );
             }
 
-            var users = await usersQuery.OrderBy(u => u.LastName).ThenBy(u => u.FirstName).ToListAsync();
+            var users = await usersQuery
+                .OrderBy(u => u.LastName)
+                .ThenBy(u => u.FirstName)
+                .ToListAsync();
 
-            return View(users);
+            return View("Index", users);
         }
 
         [HttpPost]
