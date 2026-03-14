@@ -2,9 +2,11 @@
 using InternalControlApp.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Http;
 
 namespace InternalControlApp.Controllers
 {
+    [ResponseCache(Location = ResponseCacheLocation.None, NoStore = true)]
     public class UsersController : Controller
     {
         private readonly InternalControlDbContext _context;
@@ -16,19 +18,47 @@ namespace InternalControlApp.Controllers
             _passwordHasher = passwordHasher;
         }
 
+        private bool IsSessionValid()
+        {
+            var roleName = HttpContext.Session.GetString("RoleName");
+            var userIdString = HttpContext.Session.GetString("UserId");
+            return !string.IsNullOrEmpty(roleName) && !string.IsNullOrEmpty(userIdString);
+        }
+
+        // --- ACCIÓN PARA CARGA INICIAL (GET) ---
+        [HttpGet]
+        public async Task<IActionResult> Index()
+        {
+            if (!IsSessionValid()) return RedirectToAction("Index", "Account");
+            return await GetUsersFiltered(null);
+        }
+
+        // --- ACCIÓN PARA BÚSQUEDA (POST) ---
+        // Esto evita que searchString aparezca en la URL
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Index(string searchString)
+        {
+            if (!IsSessionValid()) return RedirectToAction("Index", "Account");
+            return await GetUsersFiltered(searchString);
+        }
+
+        // Método privado para centralizar la lógica de consulta
+        private async Task<IActionResult> GetUsersFiltered(string searchString)
         {
             var roleName = HttpContext.Session.GetString("RoleName");
             ViewData["CurrentFilter"] = searchString;
 
             IQueryable<User> usersQuery = _context.Users.Include(u => u.Role);
 
+            // Filtro por jerarquía de rol
             if (roleName == "Coordinador")
             {
                 usersQuery = usersQuery.Where(u => u.Role.RoleName != "Coordinador" && u.Role.RoleName != "Superadmin");
             }
 
-            if (!String.IsNullOrEmpty(searchString))
+            // Filtro de búsqueda por nombre/apellido
+            if (!string.IsNullOrEmpty(searchString))
             {
                 var searchLower = searchString.ToLower();
                 usersQuery = usersQuery.Where(u =>
@@ -37,15 +67,20 @@ namespace InternalControlApp.Controllers
                 );
             }
 
-            var users = await usersQuery.OrderBy(u => u.LastName).ThenBy(u => u.FirstName).ToListAsync();
+            var users = await usersQuery
+                .OrderBy(u => u.LastName)
+                .ThenBy(u => u.FirstName)
+                .ToListAsync();
 
-            return View(users);
+            return View("Index", users);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
+            if (!IsSessionValid()) return RedirectToAction("Index", "Account");
+
             var user = await _context.Users.FindAsync(id);
             if (user != null)
             {
@@ -57,7 +92,8 @@ namespace InternalControlApp.Controllers
 
         public async Task<IActionResult> Create()
         {
-            // --- INICIO DE LA MODIFICACIÓN (1/4) ---
+            if (!IsSessionValid()) return RedirectToAction("Index", "Account");
+
             var roleName = HttpContext.Session.GetString("RoleName");
             IQueryable<Role> rolesQuery = _context.Roles;
 
@@ -65,11 +101,10 @@ namespace InternalControlApp.Controllers
             {
                 rolesQuery = rolesQuery.Where(r => r.RoleName != "Superadmin");
             }
-            // --- FIN DE LA MODIFICACIÓN (1/4) ---
 
             var viewModel = new CreateUserViewModel
             {
-                RolesList = await rolesQuery.ToListAsync() // Usamos la consulta filtrada
+                RolesList = await rolesQuery.ToListAsync()
             };
             return View(viewModel);
         }
@@ -78,6 +113,8 @@ namespace InternalControlApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(CreateUserViewModel model)
         {
+            if (!IsSessionValid()) return RedirectToAction("Index", "Account");
+
             if (ModelState.IsValid)
             {
                 var newUser = new User
@@ -94,8 +131,6 @@ namespace InternalControlApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // --- INICIO DE LA MODIFICACIÓN (2/4) ---
-            // Si la validación falla, recargamos la lista de roles filtrada
             var roleName = HttpContext.Session.GetString("RoleName");
             IQueryable<Role> rolesQuery = _context.Roles;
             if (roleName == "Coordinador")
@@ -103,32 +138,25 @@ namespace InternalControlApp.Controllers
                 rolesQuery = rolesQuery.Where(r => r.RoleName != "Superadmin");
             }
             model.RolesList = await rolesQuery.ToListAsync();
-            // --- FIN DE LA MODIFICACIÓN (2/4) ---
 
             return View(model);
         }
 
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
+            if (!IsSessionValid()) return RedirectToAction("Index", "Account");
+
+            if (id == null) return NotFound();
 
             var user = await _context.Users.FindAsync(id);
-            if (user == null)
-            {
-                return NotFound();
-            }
+            if (user == null) return NotFound();
 
-            // --- INICIO DE LA MODIFICACIÓN (3/4) ---
             var roleName = HttpContext.Session.GetString("RoleName");
             IQueryable<Role> rolesQuery = _context.Roles;
             if (roleName == "Coordinador")
             {
                 rolesQuery = rolesQuery.Where(r => r.RoleName != "Superadmin");
             }
-            // --- FIN DE LA MODIFICACIÓN (3/4) ---
 
             var viewModel = new EditUserViewModel
             {
@@ -137,7 +165,7 @@ namespace InternalControlApp.Controllers
                 LastName = user.LastName,
                 Email = user.Email,
                 RoleId = user.RoleId,
-                RolesList = await rolesQuery.ToListAsync() // Usamos la consulta filtrada
+                RolesList = await rolesQuery.ToListAsync()
             };
 
             return View(viewModel);
@@ -147,10 +175,9 @@ namespace InternalControlApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, EditUserViewModel model)
         {
-            if (id != model.UserId)
-            {
-                return NotFound();
-            }
+            if (!IsSessionValid()) return RedirectToAction("Index", "Account");
+
+            if (id != model.UserId) return NotFound();
 
             if (string.IsNullOrEmpty(model.Password) && string.IsNullOrEmpty(model.ConfirmPassword))
             {
@@ -161,10 +188,7 @@ namespace InternalControlApp.Controllers
             if (ModelState.IsValid)
             {
                 var userToUpdate = await _context.Users.FindAsync(id);
-                if (userToUpdate == null)
-                {
-                    return NotFound();
-                }
+                if (userToUpdate == null) return NotFound();
 
                 userToUpdate.FirstName = model.FirstName;
                 userToUpdate.LastName = model.LastName;
@@ -182,8 +206,6 @@ namespace InternalControlApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            // --- INICIO DE LA MODIFICACIÓN (4/4) ---
-            // Si la validación falla, recargamos la lista de roles filtrada
             var roleName = HttpContext.Session.GetString("RoleName");
             IQueryable<Role> rolesQuery = _context.Roles;
             if (roleName == "Coordinador")
@@ -191,7 +213,6 @@ namespace InternalControlApp.Controllers
                 rolesQuery = rolesQuery.Where(r => r.RoleName != "Superadmin");
             }
             model.RolesList = await rolesQuery.ToListAsync();
-            // --- FIN DE LA MODIFICACIÓN (4/4) ---
 
             return View(model);
         }
