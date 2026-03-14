@@ -10,6 +10,7 @@ using X.PagedList;
 using System.Text.Json;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace InternalControlApp.Controllers
 {
@@ -222,10 +223,34 @@ namespace InternalControlApp.Controllers
 
             if (!string.IsNullOrWhiteSpace(NuevasObservaciones))
             {
-                string nombreUsuario = User.FindFirst(System.Security.Claims.ClaimTypes.Name)?.Value
-                                    ?? User.FindFirst("FullName")?.Value
+                // --- INICIO DE LA NUEVA LÓGICA PARA OBTENER EL NOMBRE ---
+                string nombreUsuario = User.FindFirst("FullName")?.Value
+                                    ?? User.FindFirst(ClaimTypes.Name)?.Value
                                     ?? User.Identity?.Name
-                                    ?? "Usuario Desconocido";
+                                    ?? "";
+
+                // Si los Claims directos fallaron, buscamos por ID en la BD
+                if (string.IsNullOrWhiteSpace(nombreUsuario))
+                {
+                    string? userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                                     ?? HttpContext.Session.GetString("UserId");
+
+                    if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int userId))
+                    {
+                        var usuarioActivo = await _context.Users.FindAsync(userId);
+                        if (usuarioActivo != null)
+                        {
+                            nombreUsuario = $"{usuarioActivo.FirstName} {usuarioActivo.LastName}";
+                        }
+                    }
+                }
+
+                // Si todo lo anterior falla, dejamos el valor por defecto
+                if (string.IsNullOrWhiteSpace(nombreUsuario))
+                {
+                    nombreUsuario = "Usuario Desconocido";
+                }
+                // --- FIN DE LA NUEVA LÓGICA ---
 
                 historial.Add(new ObservacionItem
                 {
