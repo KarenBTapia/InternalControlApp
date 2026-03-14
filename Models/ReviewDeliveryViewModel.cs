@@ -4,6 +4,13 @@ using System.ComponentModel.DataAnnotations;
 
 namespace InternalControlApp.Models
 {
+    public class ObservacionItem
+    {
+        public string Autor { get; set; } = "";
+        public DateTime Fecha { get; set; }
+        public string Comentario { get; set; } = "";
+    }
+
     public class ReviewDeliveryViewModel
     {
         public int DeliveryId { get; set; }
@@ -21,6 +28,8 @@ namespace InternalControlApp.Models
 
         [Display(Name = "Retroalimentación")]
         public string? DirectorFeedback { get; set; }
+
+        public List<ObservacionItem> HistorialObservaciones { get; set; } = new List<ObservacionItem>();
 
         public bool IsReadOnly { get; set; }
     }

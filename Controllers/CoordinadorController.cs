@@ -7,6 +7,10 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using X.PagedList;
+using System.Text.Json;
+using System.Collections.Generic;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 
 namespace InternalControlApp.Controllers
 {
@@ -28,7 +32,6 @@ namespace InternalControlApp.Controllers
             int? pageSize)
         {
             ViewData["CurrentSearch"] = searchString;
-
             int size = (pageSize.HasValue && pageSize.Value > 0) ? pageSize.Value : 10;
             ViewBag.PageSize = size;
 
@@ -157,6 +160,25 @@ namespace InternalControlApp.Controllers
                 IsReadOnly = (delivery.Status == "Aprobado" || delivery.Status == "Sugerencia")
             };
 
+            var historial = new List<ObservacionItem>();
+            if (!string.IsNullOrWhiteSpace(delivery.DirectorFeedback))
+            {
+                try
+                {
+                    historial = JsonSerializer.Deserialize<List<ObservacionItem>>(delivery.DirectorFeedback) ?? new List<ObservacionItem>();
+                }
+                catch
+                {
+                    historial.Add(new ObservacionItem
+                    {
+                        Autor = "Coordinador",
+                        Fecha = delivery.ReviewDate ?? DateTime.Now,
+                        Comentario = delivery.DirectorFeedback
+                    });
+                }
+            }
+            viewModel.HistorialObservaciones = historial.OrderBy(h => h.Fecha).ToList();
+
             if (delivery.ActionIdPtci != null)
             {
                 viewModel.ProgramType = "PTCI";
@@ -181,12 +203,64 @@ namespace InternalControlApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubmitReview(int DeliveryId, string DirectorFeedback, string decision)
+        public async Task<IActionResult> SubmitReview(int DeliveryId, string NuevasObservaciones, string decision)
         {
             var delivery = await _context.Deliveries.FindAsync(DeliveryId);
             if (delivery == null) return NotFound();
 
-            delivery.DirectorFeedback = DirectorFeedback;
+            var historial = new List<ObservacionItem>();
+            if (!string.IsNullOrWhiteSpace(delivery.DirectorFeedback))
+            {
+                try
+                {
+                    historial = JsonSerializer.Deserialize<List<ObservacionItem>>(delivery.DirectorFeedback) ?? new List<ObservacionItem>();
+                }
+                catch
+                {
+                    historial.Add(new ObservacionItem { Autor = "Sistema", Fecha = delivery.ReviewDate ?? DateTime.Now, Comentario = delivery.DirectorFeedback });
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(NuevasObservaciones))
+            {
+                // --- INICIO DE LA NUEVA LÓGICA PARA OBTENER EL NOMBRE ---
+                string nombreUsuario = User.FindFirst("FullName")?.Value
+                                    ?? User.FindFirst(ClaimTypes.Name)?.Value
+                                    ?? User.Identity?.Name
+                                    ?? "";
+
+                // Si los Claims directos fallaron, buscamos por ID en la BD
+                if (string.IsNullOrWhiteSpace(nombreUsuario))
+                {
+                    string? userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                                     ?? HttpContext.Session.GetString("UserId");
+
+                    if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int userId))
+                    {
+                        var usuarioActivo = await _context.Users.FindAsync(userId);
+                        if (usuarioActivo != null)
+                        {
+                            nombreUsuario = $"{usuarioActivo.FirstName} {usuarioActivo.LastName}";
+                        }
+                    }
+                }
+
+                // Si todo lo anterior falla, dejamos el valor por defecto
+                if (string.IsNullOrWhiteSpace(nombreUsuario))
+                {
+                    nombreUsuario = "Usuario Desconocido";
+                }
+                // --- FIN DE LA NUEVA LÓGICA ---
+
+                historial.Add(new ObservacionItem
+                {
+                    Autor = nombreUsuario,
+                    Fecha = DateTime.Now,
+                    Comentario = NuevasObservaciones
+                });
+            }
+
+            delivery.DirectorFeedback = JsonSerializer.Serialize(historial);
             delivery.Status = decision;
             delivery.ReviewDate = DateTime.Now;
 
