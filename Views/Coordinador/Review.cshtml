@@ -6,76 +6,29 @@
 
 @section Styles {
     <style>
-        .card {
-            border: none;
-            border-radius: 10px;
-        }
-
-        .card-header {
-            background-color: #fff;
-            border-bottom: 1px solid #eaeaea;
-        }
-
-            .card-header h5 {
-                font-weight: 600;
-                margin: 0;
-                color: #495057;
-            }
-
-        .form-label, .fw-bold {
-            font-weight: 700;
-            color: #495057;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-        }
-
-        .btn-custom {
-            background-color: #00A987;
-            border-color: #00A987;
-            color: white;
-            transition: all 0.2s ease;
-        }
-
-            .btn-custom:hover {
-                background-color: #008f72;
-                border-color: #008f72;
-                color: white;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            }
-
-        .badge-ptci {
-            background-color: #D4693B;
-            color: white;
-        }
-
-        .badge-ptar {
-            background-color: #0887A0;
-            color: white;
-        }
-
-        .attachment-item:hover {
-            background-color: #f8f9fa;
-        }
-
-        .historial-container {
-            max-height: 200px; 
-            overflow-y: auto;
-        }
+        .card { border: none; border-radius: 10px; }
+        .card-header { background-color: #fff; border-bottom: 1px solid #eaeaea; }
+        .card-header h5 { font-weight: 600; margin: 0; color: #495057; }
+        .form-label, .fw-bold { font-weight: 700; color: #495057; font-size: 0.85rem; text-transform: uppercase; }
+        .btn-custom { background-color: #00A987; border-color: #00A987; color: white; transition: all 0.2s ease; }
+        .btn-custom:hover { background-color: #008f72; border-color: #008f72; color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .badge-ptci { background-color: #D4693B; color: white; }
+        .badge-ptar { background-color: #0887A0; color: white; }
+        .badge-user { background-color: #008f72; color: white; font-size: 0.85rem; }
+        .attachment-item:hover { background-color: #f8f9fa; }
         
-        .historial-container::-webkit-scrollbar {
-            width: 6px;
-        }
-        .historial-container::-webkit-scrollbar-track {
-            background: #f1f1f1; 
-            border-radius: 4px;
-        }
-        .historial-container::-webkit-scrollbar-thumb {
-            background: #ccc; 
-            border-radius: 4px;
-        }
-        .historial-container::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8; 
-        }
+        .historial-container { max-height: 600px; overflow-y: auto; }
+        .historial-container::-webkit-scrollbar { width: 6px; }
+        .historial-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        .historial-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
+        .historial-container::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        
+        .mensaje-historial { background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 6px; padding: 12px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+        
+        .page-title { color: #333; font-weight: 500; }
+        .comment-box { font-style: italic; color: #555; }
+        .obs-date { font-size: 0.70rem; }
+        .obs-text { white-space: pre-wrap; line-height: 1.5; }
     </style>
 }
 
@@ -85,147 +38,160 @@
     </a>
 }
 
-<div class="row">
-    <div class="col-lg-8">
-        <div class="card shadow-sm mb-4">
-            <div class="card-header py-4 text-center">
-                <h1 class="display-6 m-0" style="color: #333; font-weight: 500;">Revisión de Entrega</h1>
-                <br>
-                <h5 class="text-secondary text-start"><i class="fas fa-info-circle me-2"></i> Información de la Entrega</h5>
-            </div>
-            <div class="card-body">
-                
-                <div class="row mb-4 text-center">
-                    <div class="col-md-6">
-                        <label class="fw-bold mb-1">Usuario (Enlace)</label>
-                        <p class="text-secondary mb-0">@Model.UserName</p>
-                    </div>
-                    <div class="col-md-6">
-                        <label class="fw-bold mb-1">Fecha de Entrega</label>
-                        <p class="text-secondary mb-0">@Model.SubmissionDate.ToString("dd/MM/yyyy HH:mm")</p>
-                    </div>
-                </div>
-                <div class="row mb-4 text-center">
-                    <div class="col-md-4">
-                        <label class="fw-bold mb-1">Programa:</label>
-                        <div>
-                            <span class="badge @(esPtci ? "badge-ptci" : "badge-ptar") px-3">@Model.ProgramType</span>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="fw-bold mb-1">Trimestre:</label>
-                        <p class="text-secondary mb-0">@Model.QuarterNumber ° Trimestre</p>
-                    </div>
-                    <div class="col-md-4">
-                        <label class="fw-bold mb-1">No. Elemento/Riesgo:</label>
-                        <p class="text-secondary mb-0">@Model.ParentTaskNumber</p>
-                    </div>
-                </div>
-
-                <div class="mt-4">
-                    <label class="fw-bold">Elemento Asignado</label>
-                    <div class="p-3 rounded border bg-light text-secondary mt-1">
-                        @Model.TaskDescription
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="card shadow-sm mb-4">
-            <div class="card-header py-3">
-                <h5><i class="fas fa-paperclip me-2"></i> Archivos de Evidencia</h5>
-            </div>
-            <div class="card-body">
-                @if (Model.Attachments.Any())
-                {
-                    <div class="list-group list-group-flush border rounded">
-                        @foreach (var file in Model.Attachments)
-                        {
-                            <div class="list-group-item d-flex justify-content-between align-items-center attachment-item py-3">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-file-pdf text-danger me-3 fa-lg"></i>
-                                    <div>
-                                        <span class="d-block text-dark fw-bold">@(file.OriginalFileName.StartsWith("[C]_") ? file.OriginalFileName.Substring(4) : file.OriginalFileName)</span>
-                                        @if (file.OriginalFileName.StartsWith("[C]_"))
-                                        {
-                                            <small class="text-info fw-bold">Añadido por Coordinador</small>
-                                        }
-                                    </div>
-                                </div>
-                                <div class="btn-group shadow-sm">
-                                    <a href="~/@file.StoragePath" target="_blank" class="btn btn-sm btn-outline-secondary" title="Vista Previa">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                </div>
-                            </div>
-                        }
-                    </div>
-                }
-                else
-                {
-                    <div class="text-center py-4 text-muted">No se adjuntaron archivos.</div>
-                }
-            </div>
-        </div>
-    </div>
-
-    <div class="col-lg-4">
-        <form asp-action="SubmitReview" method="post" id="formRevisarEntrega">
-            <input type="hidden" name="DeliveryId" value="@Model.DeliveryId" />
-            <div class="card shadow-sm">
-                <div class="card-header py-3">
-                    <h5>Evaluación</h5>
+<form asp-action="SubmitReview" method="post" id="formRevisarEntrega">
+    <input type="hidden" name="DeliveryId" value="@Model.DeliveryId" />
+    
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-4 text-center">
+                    <h1 class="display-6 m-0 mb-3 page-title">Revisión de Entrega</h1>
+                    <h5 class="text-secondary text-start"><i class="fas fa-info-circle me-2"></i> Información de la Entrega</h5>
                 </div>
                 <div class="card-body">
+                    <div class="row mb-4 text-center d-flex align-items-start justify-content-between">
+                        <div class="col-xl col-lg-6 col-md-6 mb-3 mb-xl-0">
+                            <label class="fw-bold mb-1">Usuario</label>
+                            <p class="text-secondary mb-0">@Model.UserName</p>
+                        </div>
+                        <div class="col-xl col-lg-6 col-md-6 mb-3 mb-xl-0">
+                            <label class="fw-bold mb-1">Fecha de Entrega</label>
+                            <p class="text-secondary mb-0">@Model.SubmissionDate.ToString("dd/MM/yyyy")</p>
+                        </div>
+                        <div class="col-xl col-lg-4 col-md-4 mb-3 mb-xl-0">
+                            <label class="fw-bold mb-1">Programa</label>
+                            <div>
+                                <span class="badge @(esPtci ? "badge-ptci" : "badge-ptar") px-3">@Model.ProgramType</span>
+                            </div>
+                        </div>
+                        <div class="col-xl col-lg-4 col-md-4 mb-3 mb-xl-0">
+                            <label class="fw-bold mb-1">Trimestre</label>
+                            <p class="text-secondary mb-0">@Model.QuarterNumber</p>
+                        </div>
+                        <div class="col-xl col-lg-4 col-md-4">
+                            <label class="fw-bold mb-1">No. Elemento</label>
+                            <p class="text-secondary mb-0">@Model.ParentTaskNumber</p>
+                        </div>
+                    </div>
+
+                    <div class="mt-4">
+                        <label class="fw-bold">Elemento Asignado</label>
+                        <div class="p-3 rounded border bg-light text-secondary mt-1">
+                            @Model.TaskDescription
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3">
+                    <h5><i class="fas fa-paperclip me-2"></i> Archivos de Evidencia</h5>
+                </div>
+                <div class="card-body">
+                    @if (Model.Attachments.Any())
+                    {
+                        <div class="list-group list-group-flush border rounded">
+                            @foreach (var file in Model.Attachments)
+                            {
+                                <div class="list-group-item d-flex justify-content-between align-items-center attachment-item py-3">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-file-pdf text-danger me-3 fa-lg"></i>
+                                        <div>
+                                            <span class="d-block text-dark fw-bold">@(file.OriginalFileName.StartsWith("[C]_") ? file.OriginalFileName.Substring(4) : file.OriginalFileName)</span>
+                                            @if (file.OriginalFileName.StartsWith("[C]_"))
+                                            {
+                                                <small class="text-info fw-bold">Añadido por Coordinador</small>
+                                            }
+                                        </div>
+                                    </div>
+                                    <div class="btn-group shadow-sm">
+                                        <a href="~/@file.StoragePath" target="_blank" class="btn btn-sm btn-outline-secondary" title="Vista Previa">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="text-center py-4 text-muted">No se adjuntaron archivos.</div>
+                    }
+                </div>
+            </div>
+
+            <div class="card shadow-sm mb-4">
+                <div class="card-header py-3 bg-white">
+                    <h5><i class="fas fa-edit me-2"></i> Nuevas Observaciones</h5>
+                </div>
+                <div class="card-body">
+                    <textarea id="NuevasObservaciones" name="NuevasObservaciones" class="form-control mb-3" rows="5" placeholder="Escriba aquí sus observaciones o sugerencias para esta entrega..."></textarea>
+                    
+                    <div class="d-flex justify-content-end gap-2">
+                        @if (!Model.IsReadOnly) 
+                        {
+                            <button type="submit" name="decision" value="Aprobado" class="btn btn-success py-2 px-4 shadow-sm">
+                                <i class="fas fa-check-circle me-1"></i> Aprobar
+                            </button>
+                        }
+
+                        <button type="submit" name="decision" value="Sugerencia" class="btn btn-custom py-2 px-4 shadow-sm">
+                            <i class="fas fa-paper-plane me-1"></i> Enviar nuevas observaciones
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header py-3">
+                    <h5><i class="fas fa-clipboard-check me-2"></i> Evaluación Continua</h5>
+                </div>
+                <div class="card-body d-flex flex-column">
                     <div class="mb-3">
                         <label class="fw-bold mb-1 small">@Model.ContextualInfoLabel:</label>
                         <div class="bg-light p-2 rounded border">@Model.ContextualInfoText</div>
                     </div>
                     <div class="mb-3">
                         <label class="fw-bold mb-1 small">Comentario del Enlace:</label>
-                        <div class="bg-light p-2 rounded border italic" style="font-style: italic;">"@(Model.UserComment ?? "Sin comentario.")"</div>
+                        <div class="bg-light p-2 rounded border comment-box">
+                            "@(Model.UserComment ?? "Sin comentario.")"
+                        </div>
                     </div>
                     
-                    <div class="mb-3">
-                        <label class="form-label fw-bold mb-1 small">Historial de Observaciones:</label>
+                    <div class="flex-grow-1 mt-2">
+                        <label class="form-label fw-bold mb-2 small">Historial de Observaciones:</label>
                         <div class="historial-container border rounded bg-light p-3">
                             @if (Model.HistorialObservaciones != null && Model.HistorialObservaciones.Any())
                             {
                                 @foreach (var obs in Model.HistorialObservaciones)
                                 {
-                                    <div class="mb-2 pb-2 border-bottom">
-                                        <div class="d-flex justify-content-between mb-1">
-                                            <span class="badge bg-secondary" style="font-size: 0.70rem;">@obs.Autor</span>
-                                            <small class="text-muted" style="font-size: 0.70rem;">
-                                                <i class="fas fa-clock me-1"></i>Registro: @obs.Fecha.ToString("dd/MM/yyyy HH:mm")
+                                    <div class="mensaje-historial">
+                                        <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
+                                            <span class="fw-bold badge badge-user">@obs.Autor</span>
+                                            <small class="text-muted obs-date">
+                                                <i class="fas fa-calendar-alt me-1"></i> @obs.Fecha.ToString("dd/MM/yyyy HH:mm")
                                             </small>
                                         </div>
-                                        <p class="mb-0 text-dark small" style="white-space: pre-wrap;">@obs.Comentario</p>
+                                        <p class="mb-0 text-dark small obs-text">@obs.Comentario</p>
                                     </div>
                                 }
                             }
                             else
                             {
-                                <div class="text-center text-muted small py-3">
-                                    <em>Aún no hay observaciones previas registradas.</em>
+                                <div class="text-center text-muted small py-4">
+                                    <i class="fas fa-comments fs-4 mb-2 text-light"></i><br />
+                                    <em>Aún no hay observaciones previas registradas en esta entrega.</em>
                                 </div>
                             }
                         </div>
                     </div>
                 </div>
-
-                <div class="card-footer bg-white border-top p-3 d-grid gap-2">
-                    <label for="NuevasObservaciones" class="form-label fw-bold mb-0">Nuevas Observaciones:</label>
-                    <textarea id="NuevasObservaciones" name="NuevasObservaciones" class="form-control mb-3" rows="4"></textarea>
-                    
-                    <button type="submit" name="decision" value="Sugerencia" class="btn btn-custom py-2">
-                        <i class="fas fa-paper-plane me-1"></i> Enviar nuevas observaciones
-                    </button>
-                </div>
             </div>
-        </form>
+        </div>
     </div>
-</div>
+</form>
 
 @section Scripts {
     @{

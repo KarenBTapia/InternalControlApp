@@ -289,7 +289,38 @@ namespace InternalControlApp.Controllers
             var delivery = await _context.Deliveries.FindAsync(DeliveryId);
             if (delivery == null) return NotFound();
 
-            delivery.DirectorFeedback = DirectorFeedback;
+            var historial = new List<ObservacionItem>();
+            if (!string.IsNullOrWhiteSpace(delivery.DirectorFeedback))
+            {
+                try
+                {
+                    historial = JsonSerializer.Deserialize<List<ObservacionItem>>(delivery.DirectorFeedback) ?? new List<ObservacionItem>();
+                }
+                catch
+                {
+                    historial.Add(new ObservacionItem { Autor = "Sistema", Fecha = delivery.ReviewDate ?? DateTime.Now, Comentario = delivery.DirectorFeedback });
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(NuevasObservaciones))
+            {
+                string nombreUsuario = HttpContext.Session.GetString("FullName");
+
+                if (string.IsNullOrWhiteSpace(nombreUsuario))
+                {
+                    nombreUsuario = "Usuario Desconocido";
+                }
+
+                historial.Add(new ObservacionItem
+                {
+                    Autor = nombreUsuario,
+                    Fecha = DateTime.Now,
+                    Comentario = NuevasObservaciones
+                });
+            }
+
+            delivery.DirectorFeedback = JsonSerializer.Serialize(historial);
+//             delivery.DirectorFeedback = DirectorFeedback;
             delivery.Status = decision;
             delivery.ReviewDate = DateTime.Now;
 

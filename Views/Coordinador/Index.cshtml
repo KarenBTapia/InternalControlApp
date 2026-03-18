@@ -7,146 +7,36 @@
 }
 
 @section Styles {
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <style>
-        .card {
-            border: none;
-            border-radius: 10px;
-        }
-
-        .card-header {
-            background-color: #fff;
-            border-bottom: none;
-        }
-
-        .nav-tabs {
-            gap: 0;
-            padding: 0 1rem;
-            border-bottom: 1px solid #dee2e6;
-        }
-
-            .nav-tabs .nav-link {
-                color: #6c757d;
-                font-weight: 600;
-                border: 1px solid #dee2e6;
-                border-bottom: none;
-                background-color: #f8f9fa;
-                border-radius: 0;
-                padding: 0.8rem 2rem;
-                margin-right: -1px;
-                transition: all 0.2s ease;
-            }
-
-                .nav-tabs .nav-link:hover {
-                    background-color: #e2e6ea;
-                    color: #333;
-                    box-shadow: 0 -4px 8px rgba(0,0,0,0.12);
-                    z-index: 2;
-                }
-
-                .nav-tabs .nav-link.active {
-                    background: #00A987;
-                    color: white !important;
-                    border-color: #00A987;
-                    z-index: 3;
-                    box-shadow: none;
-                }
-
-        .btn-custom {
-            background-color: #00A987;
-            border-color: #00A987;
-            color: white;
-            transition: all 0.2s ease;
-        }
-
-            .btn-custom:hover {
-                background-color: #008f72;
-                border-color: #008f72;
-                color: white;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-            }
-
-        .btn-back-to-top {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            background-color: #00A987;
-            color: white;
-            border: none;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            cursor: pointer;
-        }
-
-        .badge-ptci, .badge-ptar {
-            color: white;
-        }
-
-        .badge-ptci {
-            background-color: #D4693B;
-        }
-
-        .badge-ptar {
-            background-color: #0887A0;
-        }
-
-        .table thead {
-            background-color: #f8f9fa;
-        }
-
-        .table th, .table td {
-            vertical-align: middle;
-            text-align: center;
-        }
-
-        .pagination {
-            margin-bottom: 0;
-        }
-
-            .pagination .page-link {
-                color: #6c757d;
-                background-color: #f8f9fa;
-                border-color: #dee2e6;
-                font-weight: 600;
-                transition: all 0.2s ease;
-            }
-
-                .pagination .page-link:hover {
-                    background-color: #e2e6ea;
-                    color: #333;
-                    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-                    z-index: 2;
-                }
-
-            .pagination .page-item.active .page-link {
-                background-color: #00A987;
-                border-color: #00A987;
-                color: white !important;
-                box-shadow: none;
-            }
+        .card { border: none; border-radius: 10px; }
+        .card-header { background-color: #fff; border-bottom: none; }
+        .nav-tabs { gap: 0; padding: 0 1rem; border-bottom: 1px solid #dee2e6; }
+        .nav-tabs .nav-link { color: #6c757d; font-weight: 600; border: 1px solid #dee2e6; border-bottom: none; background-color: #f8f9fa; border-radius: 0; padding: 0.8rem 2rem; margin-right: -1px; transition: all 0.2s ease; }
+        .nav-tabs .nav-link:hover { background-color: #e2e6ea; color: #333; box-shadow: 0 -4px 8px rgba(0,0,0,0.12); z-index: 2; }
+        .nav-tabs .nav-link.active { background: #00A987; color: white !important; border-color: #00A987; z-index: 3; box-shadow: none; }
+        .btn-custom { background-color: #00A987; border-color: #00A987; color: white; transition: all 0.2s ease; }
+        .btn-custom:hover { background-color: #008f72; border-color: #008f72; color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .btn-back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; border-radius: 50%; background-color: #00A987; color: white; border: none; display: none; align-items: center; justify-content: center; z-index: 9999; font-size: 1.2rem; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; }
+        .badge-ptci, .badge-ptar { color: white; }
+        .badge-ptci { background-color: #D4693B; }
+        .badge-ptar { background-color: #0887A0; }
+        .table thead { background-color: #f8f9fa; }
+        .table th, .table td { vertical-align: middle; text-align: center; }
+        .pagination { margin-bottom: 0; }
+        .pagination .page-link { color: #6c757d; background-color: #f8f9fa; border-color: #dee2e6; font-weight: 600; transition: all 0.2s ease; }
+        .pagination .page-link:hover { background-color: #e2e6ea; color: #333; box-shadow: 0 4px 8px rgba(0,0,0,0.15); z-index: 2; }
+        .pagination .page-item.active .page-link { background-color: #00A987; border-color: #00A987; color: white !important; box-shadow: none; }
+        
+        .page-size-input { width: 70px; }
+        .col-program { width: 80px; }
+        .custom-progress-container { height: 8px; width: 80px; }
+        .custom-progress-bar { width: 5%; }
 
         @@media (max-width: 768px) {
-            .d-none-mobile, .btn-text {
-                display: none !important;
-            }
-
-            .nav-tabs .nav-link {
-                width: 100%;
-                text-align: center;
-                margin-right: 0;
-                margin-bottom: -1px;
-            }
-
-            .pagination-container {
-                flex-direction: column;
-                align-items: stretch !important;
-            }
+            .d-none-mobile, .btn-text { display: none !important; }
+            .nav-tabs .nav-link { width: 100%; text-align: center; margin-right: 0; margin-bottom: -1px; }
+            .pagination-container { flex-direction: column; align-items: stretch !important; }
         }
     </style>
 }
@@ -215,7 +105,7 @@
                         <input type="hidden" name="reviewEndDate" value="@Model.ReviewEndDate?.ToString("yyyy-MM-dd")" />
 
                         <label class="me-2 small text-muted fw-bold mb-0">Mostrar:</label>
-                        <input type="number" name="pageSize" value="@currentPageSize" min="1" max="100" class="form-control form-control-sm text-center" style="width: 70px;" onchange="this.form.submit()">
+                        <input type="number" name="pageSize" value="@currentPageSize" min="1" max="100" class="form-control form-control-sm text-center page-size-input auto-submit-input">
                     </form>
 
                     <div class="m-0">
@@ -228,7 +118,7 @@
                     <table class="table align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th style="width: 80px;">Programa</th>
+                                <th class="col-program">Programa</th>
                                 <th class="d-none-mobile">No. Elemento/Riesgo</th>
                                 <th>Usuario</th>
                                 <th>Avance(Enlace)</th>
@@ -248,8 +138,8 @@
                                         <td class="d-none-mobile small text-muted">@(esPtci? item.ActionIdPtciNavigation?.Element?.ControlNumber : item.FactorIdPtarNavigation?.Risk?.RiskNumber)</td>
                                         <td class="fw-bold text-secondary">@item.User?.FirstName @item.User?.LastName</td>
                                         <td>
-                                            <div class="progress mx-auto" style="height: 8px; width: 80px;">
-                                                <div class="progress-bar bg-info" style="width:5%"></div>
+                                            <div class="progress mx-auto custom-progress-container">
+                                                <div class="progress-bar bg-info custom-progress-bar"></div>
                                             </div>
                                             <small class="text-muted">@item.Grade %</small>
                                         </td>
@@ -274,7 +164,7 @@
                         <a class="btn btn-sm btn-outline-info" asp-action="ExportHistoryToPdf" asp-route-searchString="@Model.CurrentSearch" asp-route-reviewStartDate="@Model.ReviewStartDate?.ToString("yyyy-MM-dd")" asp-route-reviewEndDate="@Model.ReviewEndDate?.ToString("yyyy-MM-dd")">
                             <i class="fas fa-file-pdf"></i> <span class="d-none d-md-inline">Exportar PDF</span>
                         </a>
-                        <form asp-action="HideReviewHistory" method="post" onsubmit="return confirm('¿Desea archivar el historial?');">
+                        <form asp-action="HideReviewHistory" method="post" class="form-confirm-archive">
                             @Html.AntiForgeryToken()
                             <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-archive"></i> <span class="d-none d-md-inline">Archivar</span></button>
                         </form>
@@ -287,7 +177,7 @@
                             <input type="hidden" name="reviewEndDate" value="@Model.ReviewEndDate?.ToString("yyyy-MM-dd")" />
 
                             <label class="me-2 small text-muted fw-bold mb-0">Mostrar:</label>
-                            <input type="number" name="pageSize" value="@currentPageSize" min="1" max="100" class="form-control form-control-sm text-center" style="width: 70px;" onchange="this.form.submit()">
+                            <input type="number" name="pageSize" value="@currentPageSize" min="1" max="100" class="form-control form-control-sm text-center page-size-input auto-submit-input">
                         </form>
 
                         <div class="m-0">
@@ -301,7 +191,7 @@
                     <table class="table align-middle mb-0">
                         <thead class="table-light">
                             <tr>
-                                <th style="width: 80px;">Programa</th>
+                                <th class="col-program">Programa</th>
                                 <th class="d-none-mobile">No. Elemento</th>
                                 <th>Usuario</th>
                                 <th>Trimestre</th>
@@ -340,10 +230,9 @@
     </div>
 </div>
 
-<button onclick="scrollToTop()" id="backToTopBtn" class="btn-back-to-top" title="Ir arriba"><i class="fas fa-arrow-up"></i></button>
+<button id="backToTopBtn" class="btn-back-to-top" title="Ir arriba"><i class="fas fa-arrow-up"></i></button>
 
 @section Scripts {
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <script>
         $(function() {
             const activeTab = localStorage.getItem('activeDashboardTab');
@@ -354,8 +243,21 @@
                 localStorage.setItem('activeDashboardTab', isPendientes ? '#pendientes-tab' : '#historial-tab');
             });
 
-            $(window).scroll(function() { $('#backToTopBtn').toggle($(this).scrollTop() > 100); });
+            $(window).scroll(function() { 
+                $('#backToTopBtn').toggle($(this).scrollTop() > 100); 
+            });
+
+            $('#backToTopBtn').on('click', function() {
+                window.scrollTo({ top: 0, behavior: 'auto' });
+            });
+
+            $('.auto-submit-input').on('change', function() {
+                this.form.submit();
+            });
+
+            $('.form-confirm-archive').on('submit', function() {
+                return confirm('¿Desea archivar el historial?');
+            });
         });
-        const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'auto' });
     </script>
 }
