@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq;
 using System.Threading.Tasks;
 using X.PagedList;
+using Microsoft.AspNetCore.Http;
 
 namespace InternalControlApp.Controllers
 {
@@ -16,8 +17,26 @@ namespace InternalControlApp.Controllers
             _context = context;
         }
 
+        // --- NUEVO MÉTODO DE SEGURIDAD (REBOTE INTELIGENTE) ---
+        private IActionResult ValidateEnlaceAccess()
+        {
+            var roleName = HttpContext.Session.GetString("RoleName");
+
+            // Si no hay sesión, al Login
+            if (string.IsNullOrEmpty(roleName)) return RedirectToAction("Index", "Account");
+
+            // Si es Coordinador o Superadmin intentando entrar aquí, lo rebotamos a su vista
+            if (roleName == "Coordinador" || roleName == "Superadmin") return RedirectToAction("Index", "Coordinador");
+
+            // Si es Enlace, le damos luz verde
+            return null;
+        }
+
         public async Task<IActionResult> Index(int? pagePendientes, int? pageHistorial)
         {
+            var access = ValidateEnlaceAccess();
+            if (access != null) return access; // <-- Si hay rebote, lo ejecutamos
+
             var userIdString = HttpContext.Session.GetString("UserId");
             if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int userId))
             {
@@ -28,7 +47,6 @@ namespace InternalControlApp.Controllers
             int pageNumberPendientes = pagePendientes ?? 1;
             int pageNumberHistorial = pageHistorial ?? 1;
 
-            // --- INICIA CORRECCIÓN: Se añaden Includes para traer los datos del padre ---
             var pendientes = await _context.Deliveries
                 .Include(d => d.ActionIdPtciNavigation.Element)
                 .Include(d => d.FactorIdPtarNavigation.Risk)
@@ -42,7 +60,6 @@ namespace InternalControlApp.Controllers
                 .Where(d => d.UserId == userId && d.Status == "Aprobado" && !d.IsHiddenForEnlace)
                 .OrderByDescending(d => d.SubmissionDate)
                 .ToPagedListAsync(pageNumberHistorial, pageSize);
-            // --- TERMINA CORRECCIÓN ---
 
             var viewModel = new EnlaceDashboardViewModel
             {
@@ -57,6 +74,9 @@ namespace InternalControlApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> HideApprovedHistory()
         {
+            var access = ValidateEnlaceAccess();
+            if (access != null) return access; // <-- Aplicado
+
             if (!int.TryParse(HttpContext.Session.GetString("UserId"), out int userId))
             {
                 return Unauthorized();
@@ -79,6 +99,9 @@ namespace InternalControlApp.Controllers
 
         public async Task<IActionResult> Review(int? id)
         {
+            var access = ValidateEnlaceAccess();
+            if (access != null) return access; // <-- Aplicado
+
             if (id == null) return NotFound();
 
             if (!int.TryParse(HttpContext.Session.GetString("UserId"), out int userId))
