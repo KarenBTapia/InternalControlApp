@@ -7,153 +7,58 @@
     int totalColumns = 16 + (roleName == "Enlace" ? 4 : 8);
 }
 
-<style>
-    body {
-        font-family: 'Inter', system-ui, -apple-system, sans-serif;
-        background-color: #f4f6f9;
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding-bottom: 40px;
-    }
+@section Styles {
+    <style>
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #f4f6f9; overflow-y: auto; overflow-x: hidden; padding-bottom: 40px; }
+        
+        .btn-custom { background-color: #00A987; border-color: #00A987; color: white; transition: all 0.2s ease; }
+        .btn-custom:hover { background-color: #008f72; border-color: #008f72; color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .btn-export-pdf { background-color: #E03E1A; color: white; }
+        .btn-export-excel { background-color: #247147; color: white; }
 
-    .btn-custom {
-        background-color: #00A987;
-        border-color: #00A987;
-        color: white;
-        transition: all 0.2s ease;
-    }
+        .table-title { color: #2c3e50; font-weight: 600; font-size: 1.75rem; }
+        
+        #realTableContainer { width: 100%; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; background: white; border-radius: 0 0 5px 5px; }
+        #realTableContainer::-webkit-scrollbar { display: none; }
+        
+        table { min-width: 2800px; font-size: 0.80rem; background-color: white; border-collapse: separate; border-spacing: 0; color: #333; }
+        th, td { padding: 10px; border-bottom: 1px solid #eee; border-right: 1px solid #f0f0f0; }
+        th:last-child, td:last-child { padding-right: 60px; }
+        
+        .sticky-th, .sticky-th-2 { position: sticky; background-color: #eff3f8; border-bottom: 2px solid #dde2e6; }
+        .sticky-th { top: 0; color: #495057; font-weight: 700; z-index: 100; text-transform: uppercase; font-size: 0.75rem; }
+        .sticky-th-2 { top: 45px; z-index: 90; }
+        
+        tbody tr:hover { background-color: #f8f9fa !important; }
+        .align-middle { vertical-align: middle !important; }
+        .text-center { text-align: center !important; }
+        .no-wrap { white-space: nowrap; }
+        
+        .cell-wide { min-width: 250px; }
+        .cell-mid { min-width: 150px; }
+        .cell-large { min-width: 200px; }
 
-        .btn-custom:hover {
-            background-color: #008f72;
-            border-color: #008f72;
-            color: white;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-        }
-
-    #realTableContainer {
-        width: 100%;
-        overflow-x: auto;
-        scrollbar-width: none;
-        -ms-overflow-style: none;
-        background: white;
-        border-radius: 0 0 5px 5px;
-    }
-
-        #realTableContainer::-webkit-scrollbar {
-            display: none;
-        }
-
-    table {
-        min-width: 2800px;
-        font-size: 0.80rem;
-        background-color: white;
-        border-collapse: separate;
-        border-spacing: 0;
-        color: #333;
-    }
-
-    th, td {
-        padding: 10px;
-        border-bottom: 1px solid #eee;
-        border-right: 1px solid #f0f0f0;
-    }
-
-        th:last-child, td:last-child {
-            padding-right: 60px;
-        }
-
-    .sticky-th, .sticky-th-2 {
-        position: sticky;
-        background-color: #eff3f8;
-        border-bottom: 2px solid #dde2e6;
-    }
-
-    .sticky-th {
-        top: 0;
-        color: #495057;
-        font-weight: 700;
-        z-index: 100;
-        text-transform: uppercase;
-        font-size: 0.75rem;
-    }
-
-    .sticky-th-2 {
-        top: 45px;
-        z-index: 90;
-    }
-
-    tbody tr:hover {
-        background-color: #f8f9fa !important;
-    }
-
-    .align-middle {
-        vertical-align: middle !important;
-    }
-
-    .text-center {
-        text-align: center !important;
-    }
-
-    .no-wrap {
-        white-space: nowrap;
-    }
-
-    .floating-scrollbar {
-        position: fixed;
-        bottom: 0;
-        left: 0;
-        width: 100%;
-        height: 25px;
-        overflow-x: auto;
-        overflow-y: hidden;
-        z-index: 9999;
-        background: #f8f9fa;
-        border-top: 1px solid #dee2e6;
-    }
-
-        .floating-scrollbar::-webkit-scrollbar {
-            height: 25px;
-        }
-
-        .floating-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #adb5bd;
-            border-radius: 12px;
-            border: 4px solid #f8f9fa;
-        }
-
-    .btn-back-to-top {
-        position: fixed;
-        bottom: 30px;
-        right: 30px;
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        background: #00A987;
-        color: white;
-        border: none;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-        cursor: pointer;
-    }
-</style>
+        .floating-scrollbar { position: fixed; bottom: 0; left: 0; width: 100%; height: 25px; overflow-x: auto; overflow-y: hidden; z-index: 9999; background: #f8f9fa; border-top: 1px solid #dee2e6; }
+        .floating-scrollbar::-webkit-scrollbar { height: 25px; }
+        .floating-scrollbar::-webkit-scrollbar-thumb { background-color: #adb5bd; border-radius: 12px; border: 4px solid #f8f9fa; }
+        
+        .btn-back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; border-radius: 50%; display: none; align-items: center; justify-content: center; z-index: 9999; background: #00A987; color: white; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; }
+    </style>
+}
 
 @section HeaderButtons {
     @if (roleName == "Coordinador" || roleName == "Superadmin")
     {
         <a class="btn btn-primary shadow-sm" asp-controller="Ptar" asp-action="Create"><i class="fa-solid fa-file-circle-exclamation"></i> Agregar Riesgo</a>
-        <a class="btn shadow-sm" style="background-color: #E03E1A; color: white;" asp-controller="Ptar" asp-action="ExportToPdf"><i class="fas fa-file-pdf"></i> Exportar a PDF</a>
-        <a class="btn shadow-sm" style="background-color: #247147; color: white;" asp-controller="Ptar" asp-action="ExportToExcel"><i class="fas fa-file-excel"></i> Exportar a Excel</a>
+        <a class="btn shadow-sm btn-export-pdf" asp-controller="Ptar" asp-action="ExportToPdf"><i class="fas fa-file-pdf"></i> Exportar a PDF</a>
+        <a class="btn shadow-sm btn-export-excel" asp-controller="Ptar" asp-action="ExportToExcel"><i class="fas fa-file-excel"></i> Exportar a Excel</a>
     }
     <a class="btn btn-custom shadow-sm" asp-controller="@homeController" asp-action="Index"><i class="fas fa-arrow-left"></i> Volver</a>
 }
 
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-header bg-white py-4 border-bottom text-center">
-        <h1 class="m-0" style="color: #2c3e50; font-weight: 600; font-size: 1.75rem;">Panel de Trabajo de Administración de Riesgos (PTAR)</h1>
-        <br>
+        <h1 class="m-0 table-title">Panel de Trabajo de Administración de Riesgos (PTAR)</h1>
     </div>
     <div class="table-responsive" id="realTableContainer">
         <table class="table table-hover mb-0" id="mainTable">
@@ -212,7 +117,7 @@
                                 @if (i == 0)
                                 {
                                     <td rowspan="@rowSpanCount" class="align-middle text-center fw-bold">@risk.RiskNumber</td>
-                                    <td rowspan="@rowSpanCount" class="align-middle" style="min-width: 250px;">@risk.Description</td>
+                                    <td rowspan="@rowSpanCount" class="align-middle cell-wide">@risk.Description</td>
                                     <td rowspan="@rowSpanCount" class="align-middle text-center">@risk.RiskClassification</td>
                                     <td rowspan="@rowSpanCount" class="align-middle text-center">@risk.ImpactGrade</td>
                                     <td rowspan="@rowSpanCount" class="align-middle text-center">@risk.OccurrenceProbability</td>
@@ -220,13 +125,13 @@
                                     <td rowspan="@rowSpanCount" class="align-middle">@risk.Strategy</td>
                                 }
                                 <td class="align-middle text-center">@factor.FactorNumber</td>
-                                <td class="align-middle" style="min-width: 250px;">@factor.FactorDescription</td>
-                                <td class="align-middle" style="min-width: 250px;">@factor.ControlAction</td>
-                                <td class="align-middle" style="min-width: 150px;">@(factor.Unit?.UnitName)</td>
-                                <td class="align-middle no-wrap" style="min-width: 150px;">@(factor.ResponsibleUser != null ? $"{factor.ResponsibleUser.FirstName} {factor.ResponsibleUser.LastName}" : "")</td>
+                                <td class="align-middle cell-wide">@factor.FactorDescription</td>
+                                <td class="align-middle cell-wide">@factor.ControlAction</td>
+                                <td class="align-middle cell-mid">@(factor.Unit?.UnitName)</td>
+                                <td class="align-middle no-wrap cell-mid">@(factor.ResponsibleUser != null ? $"{factor.ResponsibleUser.FirstName} {factor.ResponsibleUser.LastName}" : "")</td>
                                 <td class="align-middle text-center no-wrap">@factor.StartDate?.ToString("dd/MM/yyyy")</td>
                                 <td class="align-middle text-center no-wrap">@factor.EndDate?.ToString("dd/MM/yyyy")</td>
-                                <td class="align-middle" style="min-width: 200px;">@factor.VerificationMeans</td>
+                                <td class="align-middle cell-large">@factor.VerificationMeans</td>
 
                                 <td class="align-middle text-center fw-bold text-primary no-wrap">@(factor.Quarter1Grade.HasValue ? $"{factor.Quarter1Grade.Value:F0}%" : "")</td>
                                 @if (roleName != "Enlace")
@@ -277,7 +182,7 @@
                     {
                         <tr>
                             <td class="align-middle text-center fw-bold">@risk.RiskNumber</td>
-                            <td class="align-middle" style="min-width: 250px;">@risk.Description</td>
+                            <td class="align-middle cell-wide">@risk.Description</td>
                             <td class="align-middle text-center">@risk.RiskClassification</td>
                             <td class="align-middle text-center">@risk.ImpactGrade</td>
                             <td class="align-middle text-center">@risk.OccurrenceProbability</td>
@@ -308,26 +213,34 @@
 </div>
 
 <div class="floating-scrollbar" id="fakeScrollContainer"><div style="height:1px;" id="fakeScrollContent"></div></div>
-<button onclick="scrollToTop()" id="backToTopBtn" class="btn-back-to-top"><i class="fas fa-arrow-up"></i></button>
+<button id="backToTopBtn" class="btn-back-to-top"><i class="fas fa-arrow-up"></i></button>
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const tableContainer = document.getElementById("realTableContainer");
-        const table = document.getElementById("mainTable");
-        const fakeScrollContainer = document.getElementById("fakeScrollContainer");
-        const fakeScrollContent = document.getElementById("fakeScrollContent");
-        const upBtn = document.getElementById("backToTopBtn");
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const tableContainer = document.getElementById("realTableContainer");
+            const table = document.getElementById("mainTable");
+            const fakeScrollContainer = document.getElementById("fakeScrollContainer");
+            const fakeScrollContent = document.getElementById("fakeScrollContent");
+            const upBtn = document.getElementById("backToTopBtn");
 
-        const resizeFakeScroll = () => {
-            fakeScrollContent.style.width = `${table.scrollWidth}px`;
-            fakeScrollContainer.style.display = table.scrollWidth <= tableContainer.clientWidth ? 'none' : 'block';
-        };
+            const resizeFakeScroll = () => {
+                fakeScrollContent.style.width = `${table.scrollWidth}px`;
+                fakeScrollContainer.style.display = table.scrollWidth <= tableContainer.clientWidth ? 'none' : 'block';
+            };
 
-        fakeScrollContainer.addEventListener("scroll", () => tableContainer.scrollLeft = fakeScrollContainer.scrollLeft);
-        tableContainer.addEventListener("scroll", () => fakeScrollContainer.scrollLeft = tableContainer.scrollLeft);
-        window.addEventListener("resize", resizeFakeScroll);
-        resizeFakeScroll();
-        window.addEventListener("scroll", () => upBtn.style.display = window.scrollY > 300 ? "flex" : "none");
-    });
-    const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-</script>
+            fakeScrollContainer.addEventListener("scroll", () => tableContainer.scrollLeft = fakeScrollContainer.scrollLeft);
+            tableContainer.addEventListener("scroll", () => fakeScrollContainer.scrollLeft = tableContainer.scrollLeft);
+            window.addEventListener("resize", resizeFakeScroll);
+            resizeFakeScroll();
+            
+            window.addEventListener("scroll", () => {
+                upBtn.style.display = window.scrollY > 300 ? "flex" : "none";
+            });
+
+            upBtn.addEventListener("click", () => {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            });
+        });
+    </script>
+}

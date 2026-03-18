@@ -1,209 +1,182 @@
 ﻿@model InternalControlApp.Models.EnlacePtarUploadViewModel
-@{
-    ViewData["Title"] = "Cargar Evidencia PTAR";
+@{ ViewData["Title"] = "Cargar Evidencia PTAR"; }
+
+@section Styles {
+    <style>
+        body { background-color: #f4f6f9; }
+        
+        .page-title { color: #333; font-weight: 600; font-size: 2.2rem; margin: 0; text-align: center; padding: 2rem 1.5rem 1rem; }
+
+        .section-card { background-color: #fff; border: 1px solid #e9ecef; border-radius: 6px; margin-top: 1.5rem; margin-bottom: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.04); }
+        .section-header { padding: 1.25rem 1.5rem; border-bottom: 1px solid #e9ecef; font-weight: 700; font-size: 1.1rem; color: #495057; display: flex; align-items: center; }
+        .section-header i { margin-right: 0.75rem; color: #6c757d; font-size: 1.2rem; }
+        .section-body { padding: 1.5rem; }
+
+        .info-label { font-weight: 700; color: #495057; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 0.5rem; display: block; }
+        .info-value { color: #333; font-size: 0.95rem; font-weight: 400; }
+
+        .risk-info-grid { display: grid; grid-template-columns: 20% 80%; gap: 1rem; text-align: center; }
+        .responsibles-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; text-align: center; }
+        
+        .text-start-important { text-align: left !important; }
+        
+        .content-box { border: 1px solid #e9ecef; border-radius: 4px; padding: 1rem; background-color: #f8f9fa; }
+
+        .quarters-wrapper { border: 1px solid #dee2e6; border-radius: 6px; overflow: hidden; background: #fff; }
+        .quarters-header { background: #f8f9fa; border-bottom: 1px solid #dee2e6; padding: 0.85rem 1.5rem; font-weight: 700; color: #495057; }
+        .quarter-col { padding: 0; text-align: center; border-right: 1px solid #dee2e6; display: flex; flex-direction: column; }
+        .quarter-col:last-child { border-right: none; }
+        .quarter-title { font-weight: 700; margin-top: 1.5rem; padding-bottom: 0.5rem; display: inline-block; width: 100%; color: #212529; }
+
+        .btn-custom { background-color: #00A987; border-color: #00A987; color: white; font-weight: 600; }
+        .btn-custom:hover { background-color: #008f72; color: white; }
+        .btn-status-green { background-color: #6eb38e; color: #fff; border: none; cursor: default; font-weight: 700; }
+        
+        .fadeInAnimation { animation: fadeIn 0.4s ease-in-out; }
+        @@keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
 }
 
 @section HeaderButtons {
-    <a class="btn" style="background-color: #00A987; color: white;" asp-action="Index">🔙Volver</a>
+    <a class="btn btn-custom shadow-sm" asp-action="Index">
+        <i class="fas fa-arrow-left me-1"></i> Volver
+    </a>
 }
 
-<h1 class="display-6 mb-4">Cargar Evidencia de Riesgo (PTAR)</h1>
-
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-}
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-}
-
-<div class="card shadow-sm mb-4">
-    <div class="card-header"><h5>Información del Riesgo</h5></div>
-    <div class="card-body">
-        <div class="row">
-            <div class="col-md-4"><label class="fw-bold">No. de Riesgo</label><p class="text-muted">@Model.RiskNumber</p></div>
-            <div class="col-md-8"><label class="fw-bold">Descripción del Riesgo</label><p class="text-muted">@Model.Description</p></div>
-        </div>
-    </div>
-</div>
-
-@foreach (var factor in Model.Factors)
-{
-    <div class="card shadow-sm mb-4">
-        <div class="card-header bg-light">
-            <h6>Factor de Riesgo: @factor.ControlAction</h6>
-        </div>
-        <div class="card-body">
-            <div class="row mb-3">
-                <div class="col-md-4"><label class="fw-bold">No. Factor:</label> <span class="text-muted">@factor.FactorNumber</span></div>
-                <div class="col-md-4"><label class="fw-bold">Unidad Admin.:</label> <span class="text-muted">@factor.UnitName</span></div>
-                <div class="col-md-4"><label class="fw-bold">Responsable:</label> <span class="text-muted">@factor.ResponsibleUserName</span></div>
+<div class="container-fluid fadeInAnimation">
+    
+    @foreach (var type in new[] { "Success", "Error" }) {
+        if (TempData[$"{type}Message"] != null) {
+            <div class="alert alert-@(type == "Success" ? "success" : "danger") alert-dismissible fade show mt-3 mb-0" role="alert">
+                <i class="fas @(type == "Success" ? "fa-check-circle" : "fa-exclamation-circle") me-2"></i>@TempData[$"{type}Message"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
+        }
+    }
 
-            <div class="card">
-                <div class="card-header">Evidencias por Trimestre</div>
-                <div class="card-body">
-                    <div class="row text-center">
-                        @{
-                            bool isT1Final = factor.Quarter1Status == "Pendiente de Revisión" || factor.Quarter1Status == "Aprobado";
-                            bool isT2Final = factor.Quarter2Status == "Pendiente de Revisión" || factor.Quarter2Status == "Aprobado";
-                            bool isT3Final = factor.Quarter3Status == "Pendiente de Revisión" || factor.Quarter3Status == "Aprobado";
-                        }
-
-                        <div class="col-md-3 border-end p-3 d-flex flex-column justify-content-between">
-                            <h6 class="mb-3">1er Trimestre</h6>
-                            <div>
-                                @if (isT1Final)
-                                {
-                                    <div class="btn btn-success disabled w-100 mb-2" title="Esta entrega ya fue enviada y está bloqueada.">@($"{factor.Quarter1Grade:F0}") % (@factor.Quarter1Status)</div>
-                                }
-                                else if (factor.Quarter1Status == "Borrador" || factor.Quarter1Status == "Sugerencia")
-                                {
-                                    <button type="button" class="btn btn-warning w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-factor-id="@factor.FactorId" data-quarter="1" data-factor-name="@factor.ControlAction">@($"{factor.Quarter1Grade:F0}") % (@factor.Quarter1Status)</button>
-                                    <form method="post" asp-controller="Ptar" asp-action="SubmitEvidence"><input type="hidden" name="FactorId" value="@factor.FactorId" /><input type="hidden" name="Quarter" value="1" /><button type="submit" class="btn btn-sm btn-outline-success w-100">Enviar Evidencia</button></form>
-                                }
-                                else
-                                {
-                                    <button type="button" class="btn btn-primary w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-factor-id="@factor.FactorId" data-quarter="1" data-factor-name="@factor.ControlAction">Subir</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
-                                }
-                            </div>
-                        </div>
-
-                        <div class="col-md-3 border-end p-3 d-flex flex-column justify-content-between">
-                            <h6 class="mb-3">2do Trimestre</h6>
-                            <div>
-                                @if (isT2Final)
-                                {
-                                    <div class="btn btn-success disabled w-100 mb-2">@($"{factor.Quarter2Grade:F0}") % (@factor.Quarter2Status)</div>
-                                }
-                                else if (isT1Final)
-                                {
-                                    if (factor.Quarter2Status == "Borrador" || factor.Quarter2Status == "Sugerencia")
-                                    {
-                                        <button type="button" class="btn btn-warning w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-factor-id="@factor.FactorId" data-quarter="2" data-factor-name="@factor.ControlAction">@($"{factor.Quarter2Grade:F0}") % (@factor.Quarter2Status)</button>
-                                        <form method="post" asp-controller="Ptar" asp-action="SubmitEvidence"><input type="hidden" name="FactorId" value="@factor.FactorId" /><input type="hidden" name="Quarter" value="2" /><button type="submit" class="btn btn-sm btn-outline-success w-100">Enviar Evidencia</button></form>
-                                    }
-                                    else
-                                    {
-                                        <button type="button" class="btn btn-primary w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-factor-id="@factor.FactorId" data-quarter="2" data-factor-name="@factor.ControlAction">Subir</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
-                                    }
-                                }
-                                else
-                                {
-                                    <button type="button" class="btn btn-primary w-100 mb-2" disabled title="Debe completar y enviar el trimestre anterior">Subir</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
-                                }
-                            </div>
-                        </div>
-
-                        <div class="col-md-3 border-end p-3 d-flex flex-column justify-content-between">
-                            <h6 class="mb-3">3er Trimestre</h6>
-                            <div>
-                                @if (isT3Final)
-                                {
-                                    <div class="btn btn-success disabled w-100 mb-2">@($"{factor.Quarter3Grade:F0}") % (@factor.Quarter3Status)</div>
-                                }
-                                else if (isT2Final)
-                                {
-                                    if (factor.Quarter3Status == "Borrador" || factor.Quarter3Status == "Sugerencia")
-                                    {
-                                        <button type="button" class="btn btn-warning w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-factor-id="@factor.FactorId" data-quarter="3" data-factor-name="@factor.ControlAction">@($"{factor.Quarter3Grade:F0}") % (@factor.Quarter3Status)</button>
-                                        <form method="post" asp-controller="Ptar" asp-action="SubmitEvidence"><input type="hidden" name="FactorId" value="@factor.FactorId" /><input type="hidden" name="Quarter" value="3" /><button type="submit" class="btn btn-sm btn-outline-success w-100">Enviar Evidencia</button></form>
-                                    }
-                                    else
-                                    {
-                                        <button type="button" class="btn btn-primary w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-factor-id="@factor.FactorId" data-quarter="3" data-factor-name="@factor.ControlAction">Subir</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
-                                    }
-                                }
-                                else
-                                {
-                                    <button type="button" class="btn btn-primary w-100 mb-2" disabled title="Debe completar y enviar el trimestre anterior">Subir</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
-                                }
-                            </div>
-                        </div>
-
-                        <div class="col-md-3 p-3 d-flex flex-column justify-content-between">
-                            <h6 class="mb-3">4to Trimestre</h6>
-                            <div>
-                                @if (factor.Quarter4Status == "Pendiente de Revisión" || factor.Quarter4Status == "Aprobado")
-                                {
-                                    <div class="btn btn-success disabled w-100 mb-2">@($"{factor.Quarter4Grade:F0}") % (@factor.Quarter4Status)</div>
-                                }
-                                else if (isT3Final)
-                                {
-                                    if (factor.Quarter4Status == "Borrador" || factor.Quarter4Status == "Sugerencia")
-                                    {
-                                        <button type="button" class="btn btn-warning w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-factor-id="@factor.FactorId" data-quarter="4" data-factor-name="@factor.ControlAction">@($"{factor.Quarter4Grade:F0}") % (@factor.Quarter4Status)</button>
-                                        <form method="post" asp-controller="Ptar" asp-action="SubmitEvidence"><input type="hidden" name="FactorId" value="@factor.FactorId" /><input type="hidden" name="Quarter" value="4" /><button type="submit" class="btn btn-sm btn-outline-success w-100">Enviar Evidencia</button></form>
-                                    }
-                                    else
-                                    {
-                                        <button type="button" class="btn btn-primary w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-factor-id="@factor.FactorId" data-quarter="4" data-factor-name="@factor.ControlAction">Subir</button>
-                                        <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
-                                    }
-                                }
-                                else
-                                {
-                                    <button type="button" class="btn btn-primary w-100 mb-2" disabled title="Debe completar y enviar el trimestre anterior">Subir</button>
-                                    <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
-                                }
-                            </div>
-                        </div>
-                    </div>
+    <div class="section-card">
+        <h1 class="page-title">Cargar Evidencia (PTAR)</h1>
+        
+        <div class="section-header">
+            <i class="fas fa-info-circle"></i> Información del Riesgo
+        </div>
+        <div class="section-body">
+            <div class="risk-info-grid">
+                <div>
+                    <span class="info-label">No. de Riesgo</span>
+                    <div class="info-value content-box">@Model.RiskNumber</div>
+                </div>
+                <div>
+                    <span class="info-label">Descripción del Riesgo</span>
+                    <div class="info-value content-box text-start-important">@Model.Description</div>
                 </div>
             </div>
         </div>
     </div>
-}
 
-<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="uploadModalLabel">Subir Evidencia</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+    @foreach (var factor in Model.Factors) {
+        <div class="section-card">
+            <div class="section-header">
+                <i class="fas fa-exclamation-triangle"></i> 
+                <span>Factor de Riesgo: <span class="fw-normal text-dark ms-2">@factor.ControlAction</span></span>
             </div>
-            <form id="uploadForm" method="post" enctype="multipart/form-data" novalidate>
-                <div class="modal-body">
+            
+            <div class="section-body">
+                <div class="responsibles-grid mb-4">
+                    <div>
+                        <span class="info-label">No. Factor</span>
+                        <div class="info-value content-box">@factor.FactorNumber</div>
+                    </div>
+                    <div>
+                        <span class="info-label">Unidad Admin.</span>
+                        <div class="info-value content-box">@factor.UnitName</div>
+                    </div>
+                    <div>
+                        <span class="info-label">Responsable</span>
+                        <div class="info-value content-box">@factor.ResponsibleUserName</div>
+                    </div>
+                </div>
+
+                <div class="quarters-wrapper">
+                    <div class="quarters-header text-start">Evidencias por Trimestre</div>
+                    <div class="row m-0">
+                        @for (int i = 1; i <= 4; i++) {
+                            var status = factor.GetType().GetProperty($"Quarter{i}Status")?.GetValue(factor)?.ToString() ?? "Pendiente";
+                            var grade = factor.GetType().GetProperty($"Quarter{i}Grade")?.GetValue(factor) ?? 0.0;
+                            bool isFinal = status == "Pendiente de Revisión" || status == "Aprobado";
+                            bool isPrevFinal = i == 1 || (factor.GetType().GetProperty($"Quarter{i-1}Status")?.GetValue(factor)?.ToString() == "Aprobado" || factor.GetType().GetProperty($"Quarter{i-1}Status")?.GetValue(factor)?.ToString() == "Pendiente de Revisión");
+
+                            <div class="col-md-3 quarter-col">
+                                <div class="quarter-title">@i° Trimestre</div>
+                                <div class="p-3 mt-auto">
+                                    @if (isFinal) {
+                                        <div class="btn btn-rounded btn-status-green w-100 mb-2">@($"{grade:F0}")% (@status)</div>
+                                    } else if (isPrevFinal) {
+                                        bool isDraft = status == "Borrador" || status == "Sugerencia";
+                                        <button type="button" class="btn btn-rounded @(isDraft ? "btn-warning fw-bold shadow-sm" : "btn-outline-custom-cyan") w-100 mb-2" 
+                                                data-bs-toggle="modal" data-bs-target="#uploadModal" data-factor-id="@factor.FactorId" data-quarter="@i" data-factor-name="@factor.ControlAction">
+                                            @(isDraft ? $"{grade:F0}% ({status})" : "Subir")
+                                        </button>
+                                        <form method="post" asp-controller="Ptar" asp-action="SubmitEvidence">
+                                            <input type="hidden" name="FactorId" value="@factor.FactorId" /><input type="hidden" name="Quarter" value="@i" />
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary w-100" @(isDraft ? "" : "disabled")>Enviar Evidencia</button>
+                                        </form>
+                                    } else {
+                                        <div class="py-2 px-3 text-muted border rounded bg-light small">Bloqueado</div>
+                                    }
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-light">
+                <h5 class="modal-title fw-bold text-dark">Subir Evidencia</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="uploadForm" method="post" enctype="multipart/form-data">
+                <div class="modal-body p-4 p-md-5">
                     <input type="hidden" id="modalFactorId" name="FactorId" />
                     <input type="hidden" id="modalQuarter" name="Quarter" />
                     @Html.AntiForgeryToken()
+                    <div class="alert alert-info border-0 shadow-sm mb-4" id="modalInfo"></div>
 
-                    <div class="alert alert-info" id="modalInfo"></div>
-
-                    <div id="existing-files-section" class="mb-3" style="display: none;">
-                        <label class="form-label"><strong>Archivos guardados en este borrador:</strong></label>
-                        <ul id="existing-files-list" class="list-group"></ul>
+                    <div id="existing-files-section" class="mb-4" style="display:none">
+                        <label class="info-label text-dark">Archivos en borrador</label>
+                        <ul id="existing-files-list" class="list-group shadow-sm"></ul>
                     </div>
 
-                    <div id="new-files-section" class="mb-3" style="display: none;">
-                        <label class="form-label"><strong>Nuevos archivos para subir:</strong></label>
-                        <ul id="staged-files-list" class="list-group"></ul>
+                    <div id="new-files-section" class="mb-4" style="display:none">
+                        <label class="info-label text-dark">Nuevos archivos seleccionados</label>
+                        <ul id="staged-files-list" class="list-group shadow-sm"></ul>
                     </div>
 
-                    <div class="mb-3">
-                        <label id="file-input-label" for="fileUploadInput" class="form-label"><strong>Archivos de Evidencia</strong></label>
-                        <input type="file" id="fileUploadInput" class="form-control" multiple />
-                        <span id="filesError" class="text-danger small"></span>
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label fw-bold">Seleccionar archivos</label>
+                            <input type="file" id="fileUploadInput" class="form-control bg-light" multiple />
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-bold">Avance (%)</label>
+                            <input type="number" id="modalPercentage" name="Percentage" class="form-control bg-light" min="1" max="100" />
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="percentage" class="form-label"><strong>Porcentaje de Avance del Trimestre (%)</strong></label>
-                        <input type="number" id="modalPercentage" name="Percentage" class="form-control" min="1" max="100" />
-                        <span id="percentageError" class="text-danger small"></span>
-                    </div>
-                    <div class="mb-3">
-                        <label for="comment" class="form-label"><strong>Comentario (Opcional)</strong></label>
-                        <textarea id="modalComment" name="Comment" class="form-control" rows="3"></textarea>
+
+                    <div class="mb-0 mt-3">
+                        <label class="form-label fw-bold">Comentarios y observaciones (Opcional)</label>
+                        <textarea id="modalComment" name="Comment" class="form-control bg-light" rows="4"></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                    <button type="submit" class="btn btn-primary">Guardar Borrador</button>
+                <div class="modal-footer bg-light border-top-0 d-flex justify-content-between p-4">
+                    <button type="button" class="btn btn-outline-danger btn-sm px-3" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-custom px-4" id="btnSaveDraft">Guardar</button>
                 </div>
             </form>
         </div>
@@ -212,190 +185,77 @@
 
 @section Scripts {
     <script>
-        const uploadModalEl = document.getElementById('uploadModal');
-        const uploadForm = document.getElementById('uploadForm');
+        const modal = document.getElementById('uploadModal');
         const fileInput = document.getElementById('fileUploadInput');
-        const stagedFilesList = document.getElementById('staged-files-list');
-        const newFilesSection = document.getElementById('new-files-section');
-        const existingFilesList = document.getElementById('existing-files-list');
-        const existingFilesSection = document.getElementById('existing-files-section');
-
         let stagedFiles = [];
-        function renderStagedFiles() {
-            stagedFilesList.innerHTML = '';
-            newFilesSection.style.display = stagedFiles.length > 0 ? 'block' : 'none';
 
-            stagedFiles.forEach((file, index) => {
+        function renderFiles() {
+            const list = document.getElementById('staged-files-list');
+            list.innerHTML = '';
+            document.getElementById('new-files-section').style.display = stagedFiles.length ? 'block' : 'none';
+            stagedFiles.forEach((f, i) => {
                 const li = document.createElement('li');
-                li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                li.textContent = file.name;
-                li.innerHTML += `<button type="button" class="btn-close" aria-label="Quitar" onclick="removeStagedFile(${index})"></button>`;
-                stagedFilesList.appendChild(li);
+                li.className = 'list-group-item d-flex justify-content-between align-items-center small fadeInAnimation';
+                li.innerHTML = `<span>${f.name}</span> <button type="button" class="btn-close" onclick="removeStaged(${i})"></button>`;
+                list.appendChild(li);
             });
         }
 
-        function removeStagedFile(index) {
-            stagedFiles.splice(index, 1);
-            renderStagedFiles();
-        }
+        window.removeStaged = (i) => { stagedFiles.splice(i, 1); renderFiles(); };
+        fileInput.addEventListener('change', e => { stagedFiles.push(...e.target.files); renderFiles(); e.target.value = ''; });
 
-        fileInput.addEventListener('change', function(event) {
-            stagedFiles.push(...event.target.files);
-            renderStagedFiles();
-
-            document.getElementById("filesError").textContent = "";
-
-            event.target.value = '';
-        });
-
-        uploadModalEl.addEventListener('show.bs.modal', function (event) {
-            const button = event.relatedTarget;
-            const factorId = button.getAttribute('data-factor-id');
-            const quarter = button.getAttribute('data-quarter');
-            const factorName = button.getAttribute('data-factor-name');
-
-            const modalTitle = uploadModalEl.querySelector('.modal-title');
-            const modalInfo = uploadModalEl.querySelector('#modalInfo');
-            const modalFactorIdInput = uploadModalEl.querySelector('#modalFactorId');
-            const modalQuarterInput = uploadModalEl.querySelector('#modalQuarter');
-            const modalPercentageInput = uploadModalEl.querySelector('#modalPercentage');
-            const modalCommentInput = uploadModalEl.querySelector('#modalComment');
-            const fileInputLabel = uploadModalEl.querySelector('#file-input-label');
-
-            modalTitle.textContent = 'Subir Evidencia - ' + quarter + '° Trimestre';
-            modalInfo.textContent = 'Estás cargando evidencia para el factor: "' + factorName + '"';
-            modalFactorIdInput.value = factorId;
-            modalQuarterInput.value = quarter;
-
-            stagedFiles = [];
-            renderStagedFiles();
-            modalPercentageInput.value = '';
-            modalCommentInput.value = '';
-            existingFilesList.innerHTML = '';
-            existingFilesSection.style.display = 'none';
-            fileInputLabel.textContent = 'Archivos de Evidencia';
-
+        modal.addEventListener('show.bs.modal', e => {
+            const b = e.relatedTarget;
+            const factorId = b.dataset.factorId;
+            const quarter = b.dataset.quarter;
+            modal.querySelector('.modal-title').innerHTML = `Subir Evidencia - ${quarter}° Trimestre`;
+            modal.querySelector('#modalFactorId').value = factorId;
+            modal.querySelector('#modalQuarter').value = quarter;
+            modal.querySelector('#modalInfo').innerHTML = `<strong>Factor:</strong> ${b.dataset.factorName}`;
+            stagedFiles = []; renderFiles();
+            
             fetch(`/Ptar/GetDraftDetails?factorId=${factorId}&quarter=${quarter}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        modalPercentageInput.value = data.percentage;
-                        modalCommentInput.value = data.comment;
-                        fileInputLabel.textContent = 'Añadir más archivos';
-
-                        if (data.attachments && data.attachments.length > 0) {
-                            existingFilesSection.style.display = 'block';
-                            data.attachments.forEach(file => {
-                                const li = document.createElement('li');
-                                li.className = 'list-group-item d-flex justify-content-between align-items-center';
-                                li.textContent = file.fileName;
-                                li.innerHTML += ` <button type="button" class="btn btn-sm btn-outline-danger" onclick="deleteAttachment(this, ${file.id})">Eliminar</button>`;
-                                existingFilesList.appendChild(li);
-                            });
-                        }
-                    }
+                .then(r => r.json()).then(data => {
+                    if (!data.success) return;
+                    modal.querySelector('#modalPercentage').value = data.percentage || '';
+                    modal.querySelector('#modalComment').value = data.comment || '';
+                    const exList = document.getElementById('existing-files-list');
+                    exList.innerHTML = '';
+                    document.getElementById('existing-files-section').style.display = data.attachments?.length ? 'block' : 'none';
+                    data.attachments?.forEach(f => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item d-flex justify-content-between align-items-center small';
+                        li.innerHTML = `<span>${f.fileName}</span>
+                                        <button type="button" class="btn btn-sm btn-link text-danger" onclick="deleteFile(this, ${f.id})"><i class="fas fa-trash-alt"></i></button>`;
+                        exList.appendChild(li);
+                    });
                 });
         });
 
-        uploadForm.addEventListener('submit', function(event) {
-            event.preventDefault();
+        document.getElementById('uploadForm').onsubmit = async function(e) {
+            e.preventDefault();
+            const btn = document.getElementById('btnSaveDraft');
+            btn.disabled = true; btn.innerHTML = 'Guardando...';
+            const fd = new FormData(this);
+            stagedFiles.forEach(f => fd.append('Files', f));
+            try {
+                const r = await fetch('/Ptar/SaveDraft', { 
+                    method: 'POST', body: fd, 
+                    headers: { 'RequestVerificationToken': document.querySelector('[name="__RequestVerificationToken"]').value }
+                });
+                if ((await r.json()).success) window.location.reload();
+                else { alert("Error al guardar"); btn.disabled = false; btn.innerHTML = 'Guardar'; }
+            } catch (err) { alert("Error de conexión"); btn.disabled = false; btn.innerHTML = 'Guardar'; }
+        };
 
-            // limpiar mensajes
-            document.getElementById("percentageError").textContent = "";
-            document.getElementById("filesError").textContent = "";
-
-            let hasError = false;
-
-            const percentageInput = document.getElementById("modalPercentage");
-            const percentageValue = percentageInput.value.trim();
-
-            // validar que no esté vacío
-            if (percentageValue === "") {
-                document.getElementById("percentageError").textContent = "El porcentaje es obligatorio.";
-                hasError = true;
-            }
-            else if (parseInt(percentageValue) === 0) {
-                document.getElementById("percentageError").textContent = "El porcentaje debe ser mayor a 0.";
-                hasError = true;
-            }
-
-            // validar archivos
-            if (stagedFiles.length === 0 && existingFilesList.children.length === 0) {
-                document.getElementById("filesError").textContent = "Debe seleccionar al menos un archivo.";
-                hasError = true;
-            }
-
-            if (hasError) {
-                return;
-            }
-
-            const formData = new FormData(uploadForm);
-            stagedFiles.forEach(file => formData.append('Files', file));
-
-            const submitButton = uploadForm.querySelector('button[type="submit"]');
-            submitButton.disabled = true;
-            submitButton.innerHTML = `<span class="spinner-border spinner-border-sm"></span> Guardando...`;
-
-            fetch('/Ptar/SaveDraft', {
+        window.deleteFile = async (btn, id) => {
+            if (!confirm('¿Eliminar archivo?')) return;
+            const r = await fetch('/Ptar/DeleteAttachment', {
                 method: 'POST',
-                body: formData,
-                headers: {
-                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-
-                if (data.success) {
-                    window.location.reload();
-                    return;
-                }
-
-                if (data.field === "percentage") {
-                    document.getElementById("percentageError").textContent = data.message;
-                }
-                else if (data.field === "files") {
-                    document.getElementById("filesError").textContent = data.message;
-                }
-                else {
-                    alert(data.message || "Ocurrió un error.");
-                }
-
-                submitButton.disabled = false;
-                submitButton.textContent = "Guardar Borrador";
-            })
-            .catch(error => {
-                console.error("Error real:", error);
-                alert("Problema de red.");
+                headers: { 'Content-Type': 'application/json', 'RequestVerificationToken': document.querySelector('[name="__RequestVerificationToken"]').value },
+                body: JSON.stringify({ attachmentId: id })
             });
-        });
-
-        function deleteAttachment(buttonElement, attachmentId) {
-            if (!confirm('¿Estás seguro de que quieres eliminar este archivo permanentemente?')) {
-                return;
-            }
-
-            const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-            fetch('/Ptar/DeleteAttachment', {
-                method: 'POST',
-                body: JSON.stringify({ attachmentId: attachmentId }),
-                headers: {
-                    'Content-Type': 'application/json',
-                    'RequestVerificationToken': token
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    buttonElement.closest('li').remove();
-                } else {
-                    alert('Error al eliminar el archivo: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Ocurrió un error de red al intentar eliminar el archivo.');
-            });
-        }
+            if ((await r.json()).success) btn.closest('li').remove();
+        };
     </script>
 }
