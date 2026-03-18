@@ -7,10 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using X.PagedList;
-using System.Text.Json;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Http;
-using System.Security.Claims;
 
 namespace InternalControlApp.Controllers
 {
@@ -23,7 +20,97 @@ namespace InternalControlApp.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index(
+        // --- NUEVO MÉTODO DE SEGURIDAD (REBOTE INTELIGENTE) ---
+        private IActionResult ValidateCoordinadorAccess()
+        {
+            var roleName = HttpContext.Session.GetString("RoleName");
+
+            // Si no hay sesión, al Login
+            if (string.IsNullOrEmpty(roleName)) return RedirectToAction("Index", "Account");
+
+            // Si es Enlace intentando entrar aquí, lo rebotamos a su vista
+            if (roleName == "Enlace") return RedirectToAction("Index", "Enlace");
+
+            // Si es Coordinador o Superadmin, le damos luz verde devolviendo null
+            return null;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Index(bool clear = false)
+        {
+            var access = ValidateCoordinadorAccess();
+            if (access != null) return access; // <-- Si hay un rebote, lo ejecutamos
+
+            if (clear)
+            {
+                HttpContext.Session.Remove("Coord_SearchString");
+                HttpContext.Session.Remove("Coord_StartDate");
+                HttpContext.Session.Remove("Coord_EndDate");
+                HttpContext.Session.Remove("Coord_PageSize");
+                HttpContext.Session.Remove("Coord_PagePendientes");
+                HttpContext.Session.Remove("Coord_PageHistorial");
+                return RedirectToAction(nameof(Index));
+            }
+
+            string? searchString = HttpContext.Session.GetString("Coord_SearchString");
+            string? startDateStr = HttpContext.Session.GetString("Coord_StartDate");
+            string? endDateStr = HttpContext.Session.GetString("Coord_EndDate");
+            string? pageSizeStr = HttpContext.Session.GetString("Coord_PageSize");
+
+            DateTime? reviewStartDate = string.IsNullOrEmpty(startDateStr) ? null : DateTime.Parse(startDateStr);
+            DateTime? reviewEndDate = string.IsNullOrEmpty(endDateStr) ? null : DateTime.Parse(endDateStr);
+            int? pageSize = string.IsNullOrEmpty(pageSizeStr) ? null : int.Parse(pageSizeStr);
+
+            int? pagePendientes = HttpContext.Session.GetInt32("Coord_PagePendientes");
+            int? pageHistorial = HttpContext.Session.GetInt32("Coord_PageHistorial");
+
+            return await GetDashboardData(searchString, reviewStartDate, reviewEndDate, pagePendientes, pageHistorial, pageSize);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public IActionResult Index(
+            string? searchString,
+            DateTime? reviewStartDate,
+            DateTime? reviewEndDate,
+            int? pageSize,
+            int? pagePendientes,
+            int? pageHistorial,
+            string formAction = "")
+        {
+            var access = ValidateCoordinadorAccess();
+            if (access != null) return access; // <-- Aplicado
+
+            if (formAction == "search")
+            {
+                if (searchString != null) HttpContext.Session.SetString("Coord_SearchString", searchString);
+                else HttpContext.Session.Remove("Coord_SearchString");
+
+                if (reviewStartDate.HasValue) HttpContext.Session.SetString("Coord_StartDate", reviewStartDate.Value.ToString("yyyy-MM-dd"));
+                else HttpContext.Session.Remove("Coord_StartDate");
+
+                if (reviewEndDate.HasValue) HttpContext.Session.SetString("Coord_EndDate", reviewEndDate.Value.ToString("yyyy-MM-dd"));
+                else HttpContext.Session.Remove("Coord_EndDate");
+
+                HttpContext.Session.Remove("Coord_PagePendientes");
+                HttpContext.Session.Remove("Coord_PageHistorial");
+            }
+            else if (formAction == "pageSize")
+            {
+                if (pageSize.HasValue) HttpContext.Session.SetString("Coord_PageSize", pageSize.Value.ToString());
+                HttpContext.Session.Remove("Coord_PagePendientes");
+                HttpContext.Session.Remove("Coord_PageHistorial");
+            }
+            else if (formAction == "paginate")
+            {
+                if (pagePendientes.HasValue) HttpContext.Session.SetInt32("Coord_PagePendientes", pagePendientes.Value);
+                if (pageHistorial.HasValue) HttpContext.Session.SetInt32("Coord_PageHistorial", pageHistorial.Value);
+            }
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private async Task<IActionResult> GetDashboardData(
             string? searchString,
             DateTime? reviewStartDate,
             DateTime? reviewEndDate,
@@ -31,6 +118,7 @@ namespace InternalControlApp.Controllers
             int? pageHistorial,
             int? pageSize)
         {
+            // ... (Este método privado queda exactamente igual que antes) ...
             ViewData["CurrentSearch"] = searchString;
             int size = (pageSize.HasValue && pageSize.Value > 0) ? pageSize.Value : 10;
             ViewBag.PageSize = size;
@@ -47,7 +135,7 @@ namespace InternalControlApp.Controllers
                 .Include(d => d.FactorIdPtarNavigation).ThenInclude(f => f.Risk)
                 .Where(d => (d.Status == "Aprobado" || d.Status == "Sugerencia") && !d.IsHiddenForCoordinator);
 
-            if (!String.IsNullOrEmpty(searchString))
+            if (!string.IsNullOrEmpty(searchString))
             {
                 var searchLower = searchString.ToLower();
                 pendientesQuery = pendientesQuery.Where(d => (d.User.FirstName + " " + d.User.LastName).ToLower().Contains(searchLower));
@@ -81,13 +169,16 @@ namespace InternalControlApp.Controllers
                 ReviewEndDate = reviewEndDate
             };
 
-            return View(viewModel);
+            return View("Index", viewModel);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> HideReviewHistory()
         {
+            var access = ValidateCoordinadorAccess();
+            if (access != null) return access; // <-- Aplicado
+
             var deliveriesToHide = await _context.Deliveries
                 .Where(d => d.Status == "Aprobado" || d.Status == "Sugerencia")
                 .ToListAsync();
@@ -105,6 +196,9 @@ namespace InternalControlApp.Controllers
 
         public async Task<IActionResult> ExportHistoryToPdf(string? searchString, DateTime? reviewStartDate, DateTime? reviewEndDate)
         {
+            var access = ValidateCoordinadorAccess();
+            if (access != null) return access; // <-- Aplicado
+
             var historialQuery = _context.Deliveries
                 .Include(d => d.User)
                 .Where(d => (d.Status == "Aprobado" || d.Status == "Sugerencia") && !d.IsHiddenForCoordinator);
@@ -137,6 +231,9 @@ namespace InternalControlApp.Controllers
 
         public async Task<IActionResult> Review(int? id)
         {
+            var access = ValidateCoordinadorAccess();
+            if (access != null) return access; // <-- Aplicado
+
             if (id == null) return NotFound();
 
             var delivery = await _context.Deliveries
@@ -159,25 +256,6 @@ namespace InternalControlApp.Controllers
                 Attachments = delivery.Attachments.ToList(),
                 IsReadOnly = (delivery.Status == "Aprobado" || delivery.Status == "Sugerencia")
             };
-
-            var historial = new List<ObservacionItem>();
-            if (!string.IsNullOrWhiteSpace(delivery.DirectorFeedback))
-            {
-                try
-                {
-                    historial = JsonSerializer.Deserialize<List<ObservacionItem>>(delivery.DirectorFeedback) ?? new List<ObservacionItem>();
-                }
-                catch
-                {
-                    historial.Add(new ObservacionItem
-                    {
-                        Autor = "Coordinador",
-                        Fecha = delivery.ReviewDate ?? DateTime.Now,
-                        Comentario = delivery.DirectorFeedback
-                    });
-                }
-            }
-            viewModel.HistorialObservaciones = historial.OrderBy(h => h.Fecha).ToList();
 
             if (delivery.ActionIdPtci != null)
             {
@@ -203,64 +281,15 @@ namespace InternalControlApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubmitReview(int DeliveryId, string NuevasObservaciones, string decision)
+        public async Task<IActionResult> SubmitReview(int DeliveryId, string DirectorFeedback, string decision)
         {
+            var access = ValidateCoordinadorAccess();
+            if (access != null) return access; // <-- Aplicado
+
             var delivery = await _context.Deliveries.FindAsync(DeliveryId);
             if (delivery == null) return NotFound();
 
-            var historial = new List<ObservacionItem>();
-            if (!string.IsNullOrWhiteSpace(delivery.DirectorFeedback))
-            {
-                try
-                {
-                    historial = JsonSerializer.Deserialize<List<ObservacionItem>>(delivery.DirectorFeedback) ?? new List<ObservacionItem>();
-                }
-                catch
-                {
-                    historial.Add(new ObservacionItem { Autor = "Sistema", Fecha = delivery.ReviewDate ?? DateTime.Now, Comentario = delivery.DirectorFeedback });
-                }
-            }
-
-            if (!string.IsNullOrWhiteSpace(NuevasObservaciones))
-            {
-                // --- INICIO DE LA NUEVA LÓGICA PARA OBTENER EL NOMBRE ---
-                string nombreUsuario = User.FindFirst("FullName")?.Value
-                                    ?? User.FindFirst(ClaimTypes.Name)?.Value
-                                    ?? User.Identity?.Name
-                                    ?? "";
-
-                // Si los Claims directos fallaron, buscamos por ID en la BD
-                if (string.IsNullOrWhiteSpace(nombreUsuario))
-                {
-                    string? userIdStr = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                                     ?? HttpContext.Session.GetString("UserId");
-
-                    if (!string.IsNullOrEmpty(userIdStr) && int.TryParse(userIdStr, out int userId))
-                    {
-                        var usuarioActivo = await _context.Users.FindAsync(userId);
-                        if (usuarioActivo != null)
-                        {
-                            nombreUsuario = $"{usuarioActivo.FirstName} {usuarioActivo.LastName}";
-                        }
-                    }
-                }
-
-                // Si todo lo anterior falla, dejamos el valor por defecto
-                if (string.IsNullOrWhiteSpace(nombreUsuario))
-                {
-                    nombreUsuario = "Usuario Desconocido";
-                }
-                // --- FIN DE LA NUEVA LÓGICA ---
-
-                historial.Add(new ObservacionItem
-                {
-                    Autor = nombreUsuario,
-                    Fecha = DateTime.Now,
-                    Comentario = NuevasObservaciones
-                });
-            }
-
-            delivery.DirectorFeedback = JsonSerializer.Serialize(historial);
+            delivery.DirectorFeedback = DirectorFeedback;
             delivery.Status = decision;
             delivery.ReviewDate = DateTime.Now;
 
@@ -304,6 +333,9 @@ namespace InternalControlApp.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddAttachment(int deliveryId, IFormFile file)
         {
+            var access = ValidateCoordinadorAccess();
+            if (access != null) return access; // <-- Aplicado
+
             if (file == null || file.Length == 0)
             {
                 TempData["ErrorMessage"] = "Por favor, seleccione un archivo para agregar.";
@@ -311,10 +343,7 @@ namespace InternalControlApp.Controllers
             }
 
             var delivery = await _context.Deliveries.FindAsync(deliveryId);
-            if (delivery == null)
-            {
-                return NotFound();
-            }
+            if (delivery == null) return NotFound();
 
             try
             {
