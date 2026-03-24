@@ -4,74 +4,51 @@
     ViewData["Title"] = "Dashboard de Tareas";
 }
 
-<style>
-    .card-header h5 {
-        font-weight: 600;
-        color: #333;
-    }
-
-    .table td, .table th {
-        vertical-align: middle;
-        text-align: center;
-    }
-
-    .pagination {
-        justify-content: center;
-    }
-
-    @@media (max-width: 768px) {
-        .d-none-mobile {
-            display: none !important;
-        }
-    }
-</style>
-
 @if (TempData["SuccessMessage"] != null)
 {
-     <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
 }
 @if (TempData["ErrorMessage"] != null)
 {
-     <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
 }
 
 <div class="card shadow-sm mb-5">
     <div class="card-header bg-light">
         <h5 class="my-1">Evidencias con Sugerencias</h5>
     </div>
-    <div class="card-body table-responsive">
-        <table class="table table-hover">
-            <thead class="table-light">
+    <div class="card-body coor-table-container p-0">
+        <table class="coor-table">
+            <thead>
                 <tr>
-                    <th>Programa</th>
-                    <th class="d-none-mobile">No. Elemento/Riesgo</th>
-                    <th>Fecha y Hora de Revisión</th>
-                    <th>Estatus</th>
-                    <th class="text-center">Acción</th>
+                    <th class="coor-sticky-th coor-text-center">Programa</th>
+                    <th class="coor-sticky-th d-none-mobile coor-text-center">No. Elemento/Riesgo</th>
+                    <th class="coor-sticky-th coor-text-center">Fecha y Hora de Revisión</th>
+                    <th class="coor-sticky-th coor-text-center">Estatus</th>
+                    <th class="coor-sticky-th coor-text-center">Acción</th>
                 </tr>
             </thead>
             <tbody>
                 @if (!Model.TareasPendientes.Any())
                 {
-                    <tr><td colspan="5" class="text-center text-muted">No tienes evidencias con sugerencias.</td></tr>
+                    <tr><td colspan="5" class="coor-text-center text-muted">No tienes evidencias con sugerencias.</td></tr>
                 }
                 @foreach (var item in Model.TareasPendientes)
                 {
                     <tr>
-                        <td>
+                        <td class="coor-text-center">
                             @if (item.ActionIdPtci != null)
                             {
-                                <span class="badge" style="background-color: #D4693B;">PTCI</span>
+                                <span class="badge badge-ptci">PTCI</span>
                             }
                             else
                             {
-                                <span class="badge" style="background-color: #0887A0;">PTAR</span>
+                                <span class="badge badge-ptar">PTAR</span>
                             }
                         </td>
-                        <td class="d-none-mobile">@(item.ActionIdPtci != null ? item.ActionIdPtciNavigation?.Element?.ControlNumber : item.FactorIdPtarNavigation?.Risk?.RiskNumber)</td>
-                        @* --- CORRECCIÓN #1: Se cambia la fecha a ReviewDate --- *@
-                        <td>@(item.ReviewDate?.ToString("dd/MM/yyyy HH:mm"))</td>
-                        <td>
+                        <td class="d-none-mobile coor-text-center">@(item.ActionIdPtci != null ? item.ActionIdPtciNavigation?.Element?.ControlNumber : item.FactorIdPtarNavigation?.Risk?.RiskNumber)</td>
+                        <td class="coor-text-center">@(item.ReviewDate?.ToString("dd/MM/yyyy HH:mm"))</td>
+                        <td class="coor-text-center">
                             @if (item.Status == "Sugerencia")
                             {
                                 <span class="badge bg-warning text-dark">Sugerencia</span>
@@ -81,14 +58,16 @@
                                 <span class="badge bg-secondary">Pendiente</span>
                             }
                         </td>
-                        <td class="text-center"><a class="btn btn-sm btn-primary" asp-action="Review" asp-route-id="@item.DeliveryId">Revisar</a></td>
+                        <td class="coor-text-center">
+                            <a class="btn btn-sm btn-custom" asp-action="Review" asp-route-id="@item.DeliveryId">Revisar</a>
+                        </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
     <div class="card-footer bg-light">
-        @Html.PagedListPager(Model.TareasPendientes, pagePendientes => Url.Action("Index", new { pagePendientes }), new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" }, PageClasses = new string[] { "page-link" } })
+        @Html.PagedListPager(Model.TareasPendientes, pagePendientes => Url.Action("Index", new { pagePendientes }), new PagedListRenderOptions { UlElementClasses = new string[] { "coor-pagination" }, LiElementClasses = new string[] { "page-item" }, PageClasses = new string[] { "page-link" } })
     </div>
 </div>
 
@@ -100,46 +79,47 @@
             <button type="submit" class="btn btn-sm btn-danger"><i class="fas fa-trash-alt"></i> Borrar Historial</button>
         </form>
     </div>
-    <div class="card-body table-responsive">
-        <table class="table table-hover">
-            <thead class="table-light">
+    <div class="card-body coor-table-container p-0">
+        <table class="coor-table">
+            <thead>
                 <tr>
-                    <th>Programa</th>
-                    <th class="d-none-mobile">No. Elemento/Riesgo</th>
-                    <th>Fecha y Hora de Aprobación</th>
-                    <th>Estatus</th>
-                    <th class="text-center">Acción</th>
+                    <th class="coor-sticky-th coor-text-center">Programa</th>
+                    <th class="coor-sticky-th d-none-mobile coor-text-center">No. Elemento/Riesgo</th>
+                    <th class="coor-sticky-th coor-text-center">Fecha y Hora de Aprobación</th>
+                    <th class="coor-sticky-th coor-text-center">Estatus</th>
+                    <th class="coor-sticky-th coor-text-center">Acción</th>
                 </tr>
             </thead>
             <tbody>
                 @if (!Model.HistorialDeEntregas.Any())
                 {
-                    <tr><td colspan="5" class="text-center text-muted">No tienes evidencias aprobadas en tu historial.</td></tr>
+                    <tr><td colspan="5" class="coor-text-center text-muted">No tienes evidencias aprobadas en tu historial.</td></tr>
                 }
                 @foreach (var item in Model.HistorialDeEntregas)
                 {
                     <tr>
-                        <td>
+                        <td class="coor-text-center">
                             @if (item.ActionIdPtci != null)
                             {
-                                <span class="badge" style="background-color: #D4693B;">PTCI</span>
+                                <span class="badge badge-ptci">PTCI</span>
                             }
                             else
                             {
-                                <span class="badge" style="background-color: #0887A0;">PTAR</span>
+                                <span class="badge badge-ptar">PTAR</span>
                             }
                         </td>
-                        <td class="d-none-mobile">@(item.ActionIdPtci != null ? item.ActionIdPtciNavigation?.Element?.ControlNumber : item.FactorIdPtarNavigation?.Risk?.RiskNumber)</td>
-                        @* --- CORRECCIÓN #2: Se cambia la fecha a ReviewDate --- *@
-                        <td>@(item.ReviewDate?.ToString("dd/MM/yyyy HH:mm"))</td>
-                        <td><span class="badge bg-success">Aprobado</span></td>
-                        <td class="text-center"><a asp-action="Review" asp-route-id="@item.DeliveryId" class="btn btn-sm btn-primary">Ver</a></td>
+                        <td class="d-none-mobile coor-text-center">@(item.ActionIdPtci != null ? item.ActionIdPtciNavigation?.Element?.ControlNumber : item.FactorIdPtarNavigation?.Risk?.RiskNumber)</td>
+                        <td class="coor-text-center">@(item.ReviewDate?.ToString("dd/MM/yyyy HH:mm"))</td>
+                        <td class="coor-text-center"><span class="badge bg-success">Aprobado</span></td>
+                        <td class="coor-text-center">
+                            <a asp-action="Review" asp-route-id="@item.DeliveryId" class="btn btn-sm btn-custom">Ver</a>
+                        </td>
                     </tr>
                 }
             </tbody>
         </table>
     </div>
     <div class="card-footer bg-light">
-        @Html.PagedListPager(Model.HistorialDeEntregas, pageHistorial => Url.Action("Index", new { pageHistorial }), new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" }, PageClasses = new string[] { "page-link" } })
+        @Html.PagedListPager(Model.HistorialDeEntregas, pageHistorial => Url.Action("Index", new { pageHistorial }), new PagedListRenderOptions { UlElementClasses = new string[] { "coor-pagination" }, LiElementClasses = new string[] { "page-item" }, PageClasses = new string[] { "page-link" } })
     </div>
 </div>

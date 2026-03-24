@@ -1,190 +1,75 @@
 ﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
 @{
-    var roleName = HttpContextAccessor.HttpContext!.Session.GetString("RoleName");
-    var homeController = (roleName == "Coordinador" || roleName == "Superadmin") ? "Coordinador" : "Enlace";
+    var session = HttpContextAccessor.HttpContext?.Session;
+    var roleName = session?.GetString("RoleName");
+    var fullName = session?.GetString("FullName");
+    
+    var isAdminOrCoord = roleName == "Coordinador" || roleName == "Superadmin";
+    var isEnlace = roleName == "Enlace";
+    
+    var hasPtci = session?.GetString("HasPtciTasks") == "True";
+    var hasPtar = session?.GetString("HasPtarTasks") == "True";
 
-    var hasPtciTasks = HttpContextAccessor.HttpContext!.Session.GetString("HasPtciTasks") == "True";
-    var hasPtarTasks = HttpContextAccessor.HttpContext!.Session.GetString("HasPtarTasks") == "True";
+    var homeController = isAdminOrCoord ? "Coordinador" : "Enlace";
 }
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Sistema de Control Interno</title>
+    
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            background-color: #F3F4F6;
-        }
-
-        .main-header {
-            background-color: #00A987;
-            color: white;
-            padding: 1rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-
-        .header-brand, .header-brand:hover {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            color: white;
-            text-decoration: none;
-        }
-
-            .header-brand img {
-                height: 40px;
-            }
-
-        .user-bar {
-            background-color: #FFFFFF;
-            padding: 0.75rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid #dee2e6;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-
-        .user-info .role {
-            font-weight: 600;
-            color: #333;
-        }
-
-        .user-info .name {
-            color: #555;
-        }
-
-        .dashboard-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.5rem;
-        }
-
-            .dashboard-buttons .btn, .btn-logout {
-                font-weight: 600;
-                color: white;
-                border: none;
-                transition: filter 0.2s ease-in-out;
-            }
-
-                .dashboard-buttons .btn:hover, .btn-logout:hover {
-                    filter: brightness(90%);
-                }
-
-        .btn-logout {
-            background-color: #737373;
-        }
-
-        .btn-usuarios {
-            background-color: #00A987;
-        }
-
-        .btn-ptci {
-            background-color: #D4693B;
-        }
-
-        .btn-ptar {
-            background-color: #0887A0;
-        }
-
-        footer {
-            text-align: center;
-            line-height: 1.6;
-            font-size: 14px;
-            margin-top: 2rem;
-            padding-bottom: 1rem;
-        }
-
-            footer p {
-                margin: 4px 0;
-            }
-
-            footer a {
-                color: #1ab192;
-                text-decoration: none;
-                font-weight: bold;
-            }
-
-        media (max-width: 768px) {
-            .main-header {
-                font-size: 1rem;
-                padding: 0.75rem 1rem;
-            }
-
-            .header-brand span {
-                display: none;
-            }
-
-            .user-bar {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 1rem;
-            }
-
-            .dashboard-buttons {
-                width: 100%;
-                justify-content: center;
-            }
-        }
-    </style>
-    <script>
-        function verificarSesion() {
-            if (document.cookie.indexOf("SesionActiva=true") === -1) {
-                window.location.replace("/Account/Index");
-            }
-        }
-        verificarSesion();
-        window.addEventListener("pageshow", function(event) {
-            verificarSesion();
-        });
-    </script>
+    <link rel="stylesheet" href="~/css/style.css" asp-append-version="true" />
+    
     @await RenderSectionAsync("Styles", required: false)
 </head>
 <body>
     <header>
-        <div class="main-header">
+        <nav class="main-header">
             <a asp-controller="@homeController" asp-action="Index" class="header-brand">
                 <img src="~/images/logo_uttn2.png" alt="Logo UTTN" />
                 <span>Sistema de Control Interno Institucional</span>
             </a>
-            <a class="btn btn-danger btn-sm" asp-controller="Account" asp-action="Logout" onclick="localStorage.setItem('sesionBloqueada', 'true');"><i class="fa-solid fa-right-to-bracket"></i> Cerrar Sesión</a>
-        </div>
+            <a class="btn btn-danger btn-sm" asp-controller="Account" asp-action="Logout"
+                   onclick="localStorage.setItem('sesionBloqueada', 'true');">
+                <i class="fa-solid fa-right-to-bracket"></i> Cerrar Sesión
+            </a>
+        </nav>
+
         <div class="user-bar">
             <div class="user-info">
-                <div class="role">@roleName</div>
-                <div class="name">@HttpContextAccessor.HttpContext!.Session.GetString("FullName")</div>
+                <span class="role">@roleName</span>
+                <span class="name">@fullName</span>
             </div>
+
             <div class="dashboard-buttons">
                 @if (IsSectionDefined("HeaderButtons"))
                 {
                     @RenderSection("HeaderButtons")
                 }
-                else if (roleName == "Coordinador" || roleName == "Superadmin")
+                else
                 {
-                    <a class="btn btn-sm btn-usuarios" asp-controller="Users" asp-action="Index"><i class="fa-solid fa-users"></i> USUARIOS</a>
-                    <a class="btn btn-sm btn-ptci" asp-controller="Ptci" asp-action="Index"><i class="fa-regular fa-rectangle-list"></i> PANEL PTCI</a>
-                    <a class="btn btn-sm btn-ptar" asp-controller="Ptar" asp-action="Index"><i class="fa-solid fa-file-circle-exclamation"></i> PANEL PTAR</a>
-                }
-                else if (roleName == "Enlace")
-                {
-                    @if (hasPtciTasks)
+                    if (isAdminOrCoord)
                     {
+                        <a class="btn btn-sm btn-usuarios" asp-controller="Users" asp-action="Index"><i class="fa-solid fa-users"></i> USUARIOS</a>
                         <a class="btn btn-sm btn-ptci" asp-controller="Ptci" asp-action="Index"><i class="fa-regular fa-rectangle-list"></i> PANEL PTCI</a>
+                        <a class="btn btn-sm btn-ptar" asp-controller="Ptar" asp-action="Index"><i class="fa-solid fa-file-circle-exclamation"></i> PANEL PTAR</a>
                     }
-                    @if (hasPtarTasks)
+                    else if (isEnlace)
                     {
-                        <a class="btn btn-sm btn-ptar" asp-controller="Ptar" asp-action="Index"><i class="fa-solid fa-file-circle-exclamation"></i> sPANEL PTAR</a>
+                        if (hasPtci)
+                        {
+                            <a class="btn btn-sm btn-ptci" asp-controller="Ptci" asp-action="Index"><i class="fa-regular fa-rectangle-list"></i> PANEL PTCI</a>
+                        }
+                        if (hasPtar)
+                        {
+                            <a class="btn btn-sm btn-ptar" asp-controller="Ptar" asp-action="Index"><i class="fa-solid fa-file-circle-exclamation"></i> PANEL PTAR</a>
+                        }
                     }
                 }
             </div>
@@ -197,17 +82,7 @@
         </main>
     </div>
 
-    <footer>
-        <p>
-            Innovación tecnológica impulsada por la
-            <a href="https://login.uttn.app/Home/Creditos" target="_blank">Carrera de Tecnologías de la Información</a>
-            y el Departamento de Sistemas
-        </p>
-        <p>
-            2025 | Universidad Tecnológica de Tamaulipas Norte |
-            <a href="https://www.uttn.edu.mx/aviso-de-privacidad/" target="_blank">Aviso de Privacidad</a>
-        </p>
-    </footer>
+    <partial name="_Footer" />
 
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>

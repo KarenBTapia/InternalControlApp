@@ -7,7 +7,6 @@
     var controllerName = Model.ProgramType == "PTCI" ? "Ptci" : "Ptar";
     var esPtci = Model.ProgramType == "PTCI";
 
-    // Lógica para intentar leer el JSON de DirectorFeedback y convertirlo en lista
     var historialJson = new List<dynamic>();
     var textoRetroalimentacion = Model.DirectorFeedback;
     var esJson = false;
@@ -37,38 +36,9 @@
         }
         catch
         {
-            // Si por alguna razón falla al leer el JSON, mostramos el texto plano
             esJson = false;
         }
     }
-}
-
-@section Styles {
-    <style>
-        .card { border: none; border-radius: 10px; }
-        .card-header { background-color: #fff; border-bottom: 1px solid #eaeaea; }
-        .card-header h5 { font-weight: 600; margin: 0; color: #495057; }
-        .form-label, .fw-bold { font-weight: 700; color: #495057; font-size: 0.85rem; text-transform: uppercase; }
-        .btn-custom { background-color: #00A987; border-color: #00A987; color: white; transition: all 0.2s ease; }
-        .btn-custom:hover { background-color: #008f72; border-color: #008f72; color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
-        .badge-ptci { background-color: #D4693B; color: white; }
-        .badge-ptar { background-color: #0887A0; color: white; }
-        .badge-user { background-color: #008f72; color: white; font-size: 0.85rem; }
-        .attachment-item:hover { background-color: #f8f9fa; }
-        
-        .historial-container { max-height: 600px; overflow-y: auto; }
-        .historial-container::-webkit-scrollbar { width: 6px; }
-        .historial-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        .historial-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-        .historial-container::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
-        
-        .mensaje-historial { background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 6px; padding: 12px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        
-        .page-title { color: #333; font-weight: 500; }
-        .comment-box { font-style: italic; color: #555; }
-        .obs-date { font-size: 0.70rem; }
-        .obs-text { white-space: pre-wrap; line-height: 1.5; }
-    </style>
 }
 
 @section HeaderButtons {
