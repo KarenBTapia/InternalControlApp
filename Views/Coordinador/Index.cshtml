@@ -103,10 +103,10 @@
                                         <td class="coor-align-middle coor-text-center d-none-mobile small text-muted">@(esPtci? item.ActionIdPtciNavigation?.Element?.ControlNumber : item.FactorIdPtarNavigation?.Risk?.RiskNumber)</td>
                                         <td class="coor-align-middle coor-text-center fw-bold text-secondary">@item.User?.FirstName @item.User?.LastName</td>
                                         <td class="coor-align-middle coor-text-center">
-                                            <div class="progress mx-auto custom-progress-container">
+                                            <!--<div class="progress mx-auto custom-progress-container">
                                                 <div class="progress-bar bg-info custom-progress-bar"></div>
-                                            </div>
-                                            <small class="text-muted">@item.Grade %</small>
+                                            </div>-->
+                                            <p class="text-muted">@item.Grade %</p>
                                         </td>
                                         <td class="coor-align-middle coor-text-center d-none-mobile small">@item.QuarterNumber</td>
                                         <td class="coor-align-middle coor-text-center d-none-mobile small">@item.SubmissionDate.ToString("dd/MM/yyyy HH:mm")</td>
@@ -225,4 +225,4 @@
             });
         });
     </script>
-}
+git}
