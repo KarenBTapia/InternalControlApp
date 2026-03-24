@@ -1,35 +1,41 @@
-﻿@model InternalControlApp.Models.ReviewDeliveryViewModel
+﻿@using System.Text.Json
+@model InternalControlApp.Models.ReviewDeliveryViewModel
 @{
     ViewData["Title"] = "Revisar Entrega";
     var esPtci = Model.ProgramType == "PTCI";
-}
 
-@section Styles {
-    <style>
-        .card { border: none; border-radius: 10px; }
-        .card-header { background-color: #fff; border-bottom: 1px solid #eaeaea; }
-        .card-header h5 { font-weight: 600; margin: 0; color: #495057; }
-        .form-label, .fw-bold { font-weight: 700; color: #495057; font-size: 0.85rem; text-transform: uppercase; }
-        .btn-custom { background-color: #00A987; border-color: #00A987; color: white; transition: all 0.2s ease; }
-        .btn-custom:hover { background-color: #008f72; border-color: #008f72; color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
-        .badge-ptci { background-color: #D4693B; color: white; }
-        .badge-ptar { background-color: #0887A0; color: white; }
-        .badge-user { background-color: #008f72; color: white; font-size: 0.85rem; }
-        .attachment-item:hover { background-color: #f8f9fa; }
-        
-        .historial-container { max-height: 600px; overflow-y: auto; }
-        .historial-container::-webkit-scrollbar { width: 6px; }
-        .historial-container::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
-        .historial-container::-webkit-scrollbar-thumb { background: #ccc; border-radius: 4px; }
-        .historial-container::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
-        
-        .mensaje-historial { background-color: #ffffff; border: 1px solid #dee2e6; border-radius: 6px; padding: 12px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
-        
-        .page-title { color: #333; font-weight: 500; }
-        .comment-box { font-style: italic; color: #555; }
-        .obs-date { font-size: 0.70rem; }
-        .obs-text { white-space: pre-wrap; line-height: 1.5; }
-    </style>
+    var historialJson = new List<dynamic>();
+    var textoRetroalimentacion = Model.DirectorFeedback;
+    var esJson = false;
+
+    if (!string.IsNullOrEmpty(Model.DirectorFeedback) && Model.DirectorFeedback.Trim().StartsWith("["))
+    {
+        try
+        {
+            using (var doc = JsonDocument.Parse(Model.DirectorFeedback))
+            {
+                foreach (var item in doc.RootElement.EnumerateArray())
+                {
+                    var autor = item.TryGetProperty("Autor", out var a) ? a.GetString() : "Coordinador";
+                    var fechaStr = item.TryGetProperty("Fecha", out var f) ? f.GetString() : "";
+                    var comentario = item.TryGetProperty("Comentario", out var c) ? c.GetString() : "";
+                    
+                    DateTime fechaObj;
+                    if (!DateTime.TryParse(fechaStr, out fechaObj)) 
+                    {
+                        fechaObj = DateTime.Now;
+                    }
+
+                    historialJson.Add(new { Autor = autor, Fecha = fechaObj, Comentario = comentario });
+                }
+            }
+            esJson = true;
+        }
+        catch
+        {
+            esJson = false;
+        }
+    }
 }
 
 @section HeaderButtons {
@@ -163,9 +169,9 @@
                     <div class="flex-grow-1 mt-2">
                         <label class="form-label fw-bold mb-2 small">Historial de Observaciones:</label>
                         <div class="historial-container border rounded bg-light p-3">
-                            @if (Model.HistorialObservaciones != null && Model.HistorialObservaciones.Any())
+                            @if (esJson && historialJson.Any())
                             {
-                                @foreach (var obs in Model.HistorialObservaciones)
+                                @foreach (var obs in historialJson)
                                 {
                                     <div class="mensaje-historial">
                                         <div class="d-flex justify-content-between align-items-center border-bottom pb-2 mb-2">
@@ -177,6 +183,12 @@
                                         <p class="mb-0 text-dark small obs-text">@obs.Comentario</p>
                                     </div>
                                 }
+                            }
+                            else if (!string.IsNullOrEmpty(textoRetroalimentacion))
+                            {
+                                <div class="mensaje-historial">
+                                    <p class="mb-0 text-dark small obs-text">@textoRetroalimentacion</p>
+                                </div>
                             }
                             else
                             {

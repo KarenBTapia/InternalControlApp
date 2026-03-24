@@ -1,4 +1,11 @@
-﻿// Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
-// for details on configuring this project to bundle and minify static web assets.
+﻿function verificarSesion() {
+    if (document.cookie.indexOf("SesionActiva=true") === -1) {
+        window.location.replace("/Account/Index");
+    }
+}
 
-// Write your JavaScript code.
+verificarSesion();
+
+window.addEventListener("pageshow", function (event) {
+    verificarSesion();
+});

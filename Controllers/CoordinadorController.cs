@@ -3,8 +3,10 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Rotativa.AspNetCore;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using X.PagedList;
 using Microsoft.AspNetCore.Http;
@@ -20,18 +22,14 @@ namespace InternalControlApp.Controllers
             _context = context;
         }
 
-        // --- NUEVO MÉTODO DE SEGURIDAD (REBOTE INTELIGENTE) ---
-        private IActionResult ValidateCoordinadorAccess()
+        private IActionResult? ValidateCoordinadorAccess()
         {
             var roleName = HttpContext.Session.GetString("RoleName");
 
-            // Si no hay sesión, al Login
             if (string.IsNullOrEmpty(roleName)) return RedirectToAction("Index", "Account");
 
-            // Si es Enlace intentando entrar aquí, lo rebotamos a su vista
             if (roleName == "Enlace") return RedirectToAction("Index", "Enlace");
 
-            // Si es Coordinador o Superadmin, le damos luz verde devolviendo null
             return null;
         }
 
@@ -39,7 +37,7 @@ namespace InternalControlApp.Controllers
         public async Task<IActionResult> Index(bool clear = false)
         {
             var access = ValidateCoordinadorAccess();
-            if (access != null) return access; // <-- Si hay un rebote, lo ejecutamos
+            if (access != null) return access;
 
             if (clear)
             {
@@ -79,7 +77,7 @@ namespace InternalControlApp.Controllers
             string formAction = "")
         {
             var access = ValidateCoordinadorAccess();
-            if (access != null) return access; // <-- Aplicado
+            if (access != null) return access;
 
             if (formAction == "search")
             {
@@ -118,7 +116,6 @@ namespace InternalControlApp.Controllers
             int? pageHistorial,
             int? pageSize)
         {
-            // ... (Este método privado queda exactamente igual que antes) ...
             ViewData["CurrentSearch"] = searchString;
             int size = (pageSize.HasValue && pageSize.Value > 0) ? pageSize.Value : 10;
             ViewBag.PageSize = size;
@@ -138,8 +135,8 @@ namespace InternalControlApp.Controllers
             if (!string.IsNullOrEmpty(searchString))
             {
                 var searchLower = searchString.ToLower();
-                pendientesQuery = pendientesQuery.Where(d => (d.User.FirstName + " " + d.User.LastName).ToLower().Contains(searchLower));
-                historialQuery = historialQuery.Where(d => (d.User.FirstName + " " + d.User.LastName).ToLower().Contains(searchLower));
+                pendientesQuery = pendientesQuery.Where(d => (d.User!.FirstName + " " + d.User!.LastName).ToLower().Contains(searchLower));
+                historialQuery = historialQuery.Where(d => (d.User!.FirstName + " " + d.User!.LastName).ToLower().Contains(searchLower));
             }
 
             if (reviewStartDate.HasValue)
@@ -177,7 +174,7 @@ namespace InternalControlApp.Controllers
         public async Task<IActionResult> HideReviewHistory()
         {
             var access = ValidateCoordinadorAccess();
-            if (access != null) return access; // <-- Aplicado
+            if (access != null) return access;
 
             var deliveriesToHide = await _context.Deliveries
                 .Where(d => d.Status == "Aprobado" || d.Status == "Sugerencia")
@@ -197,7 +194,7 @@ namespace InternalControlApp.Controllers
         public async Task<IActionResult> ExportHistoryToPdf(string? searchString, DateTime? reviewStartDate, DateTime? reviewEndDate)
         {
             var access = ValidateCoordinadorAccess();
-            if (access != null) return access; // <-- Aplicado
+            if (access != null) return access;
 
             var historialQuery = _context.Deliveries
                 .Include(d => d.User)
@@ -206,7 +203,7 @@ namespace InternalControlApp.Controllers
             if (!String.IsNullOrEmpty(searchString))
             {
                 var searchLower = searchString.ToLower();
-                historialQuery = historialQuery.Where(d => (d.User.FirstName + " " + d.User.LastName).ToLower().Contains(searchLower));
+                historialQuery = historialQuery.Where(d => (d.User!.FirstName + " " + d.User!.LastName).ToLower().Contains(searchLower));
             }
 
             if (reviewStartDate.HasValue)
@@ -232,7 +229,7 @@ namespace InternalControlApp.Controllers
         public async Task<IActionResult> Review(int? id)
         {
             var access = ValidateCoordinadorAccess();
-            if (access != null) return access; // <-- Aplicado
+            if (access != null) return access;
 
             if (id == null) return NotFound();
 
@@ -248,7 +245,7 @@ namespace InternalControlApp.Controllers
             var viewModel = new ReviewDeliveryViewModel
             {
                 DeliveryId = delivery.DeliveryId,
-                UserName = $"{delivery.User.FirstName} {delivery.User.LastName}",
+                UserName = $"{delivery.User!.FirstName} {delivery.User!.LastName}",
                 SubmissionDate = delivery.SubmissionDate,
                 QuarterNumber = delivery.QuarterNumber ?? 0,
                 UserComment = delivery.UserComment,
@@ -281,10 +278,10 @@ namespace InternalControlApp.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SubmitReview(int DeliveryId, string DirectorFeedback, string decision)
+        public async Task<IActionResult> SubmitReview(int DeliveryId, string? NuevasObservaciones, string decision)
         {
             var access = ValidateCoordinadorAccess();
-            if (access != null) return access; // <-- Aplicado
+            if (access != null) return access;
 
             var delivery = await _context.Deliveries.FindAsync(DeliveryId);
             if (delivery == null) return NotFound();
@@ -304,12 +301,7 @@ namespace InternalControlApp.Controllers
 
             if (!string.IsNullOrWhiteSpace(NuevasObservaciones))
             {
-                string nombreUsuario = HttpContext.Session.GetString("FullName");
-
-                if (string.IsNullOrWhiteSpace(nombreUsuario))
-                {
-                    nombreUsuario = "Usuario Desconocido";
-                }
+                string nombreUsuario = HttpContext.Session.GetString("FullName") ?? "Usuario Desconocido";
 
                 historial.Add(new ObservacionItem
                 {
@@ -320,7 +312,6 @@ namespace InternalControlApp.Controllers
             }
 
             delivery.DirectorFeedback = JsonSerializer.Serialize(historial);
-//             delivery.DirectorFeedback = DirectorFeedback;
             delivery.Status = decision;
             delivery.ReviewDate = DateTime.Now;
 
@@ -365,7 +356,7 @@ namespace InternalControlApp.Controllers
         public async Task<IActionResult> AddAttachment(int deliveryId, IFormFile file)
         {
             var access = ValidateCoordinadorAccess();
-            if (access != null) return access; // <-- Aplicado
+            if (access != null) return access;
 
             if (file == null || file.Length == 0)
             {
