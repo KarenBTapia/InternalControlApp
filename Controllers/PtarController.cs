@@ -19,38 +19,67 @@ namespace InternalControlApp.Controllers
             _logger = logger;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? year)
         {
             var roleName = HttpContext.Session.GetString("RoleName");
             var userIdString = HttpContext.Session.GetString("UserId");
 
+            //validacion de sesion
             if (string.IsNullOrEmpty(roleName) || string.IsNullOrEmpty(userIdString))
             {
                 return RedirectToAction("Index", "Account");
             }
 
+            //variables para filtrado por año
+            int selectedYear = year ?? DateTime.Now.Year;
+            var startYearFilter = new DateOnly(selectedYear, 1, 1);
+            var endYearFilter = new DateOnly(selectedYear + 1, 1, 1);
+
+            var years = Enumerable.Range(DateTime.Now.Year - 5, 10).ToList();
+            ViewBag.YearList = new SelectList(years, selectedYear);
+
             if (roleName == "Coordinador" || roleName == "Superadmin")
             {
-                // El Coordinador ve todo, como antes.
                 var allRisks = await _context.RisksPtars
-                    .Include(r => r.RiskFactorsPtars)
+                    .Where(r => r.RiskFactorsPtars
+                        .Any(rf => rf.StartDate.HasValue &&
+                                   rf.StartDate.Value >= startYearFilter &&
+                                   rf.StartDate.Value < endYearFilter))
+                    .Include(r => r.RiskFactorsPtars
+                        .Where(rf => rf.StartDate.HasValue &&
+                                     rf.StartDate.Value >= startYearFilter &&
+                                     rf.StartDate.Value < endYearFilter))
                         .ThenInclude(rf => rf.ResponsibleUser)
-                    .Include(r => r.RiskFactorsPtars)
+                    .Include(r => r.RiskFactorsPtars
+                        .Where(rf => rf.StartDate.HasValue &&
+                                     rf.StartDate.Value >= startYearFilter &&
+                                     rf.StartDate.Value < endYearFilter))
                         .ThenInclude(rf => rf.Unit)
                     .ToListAsync();
+
                 return View(allRisks);
             }
-            else // Lógica para el rol "Enlace"
+            else
             {
                 int.TryParse(userIdString, out int userId);
 
-                // 1. Buscamos los riesgos (padres) que tienen al menos un factor asignado a este usuario.
-                // 2. Incluimos ÚNICAMENTE los factores de riesgo asignados a este usuario.
                 var risksForEnlace = await _context.RisksPtars
-                    .Where(r => r.RiskFactorsPtars.Any(f => f.ResponsibleUserId == userId))
-                    .Include(r => r.RiskFactorsPtars.Where(f => f.ResponsibleUserId == userId))
+                    .Where(r => r.RiskFactorsPtars
+                        .Any(f => f.ResponsibleUserId == userId &&
+                                  f.StartDate.HasValue &&
+                                  f.StartDate.Value >= startYearFilter &&
+                                  f.StartDate.Value < endYearFilter))
+                    .Include(r => r.RiskFactorsPtars
+                        .Where(f => f.ResponsibleUserId == userId &&
+                                    f.StartDate.HasValue &&
+                                    f.StartDate.Value >= startYearFilter &&
+                                    f.StartDate.Value < endYearFilter))
                         .ThenInclude(f => f.ResponsibleUser)
-                    .Include(r => r.RiskFactorsPtars.Where(f => f.ResponsibleUserId == userId))
+                    .Include(r => r.RiskFactorsPtars
+                        .Where(f => f.ResponsibleUserId == userId &&
+                                    f.StartDate.HasValue &&
+                                    f.StartDate.Value >= startYearFilter &&
+                                    f.StartDate.Value < endYearFilter))
                         .ThenInclude(f => f.Unit)
                     .ToListAsync();
 

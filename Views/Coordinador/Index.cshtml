@@ -3,7 +3,9 @@
 
 @{
     ViewData["Title"] = "Dashboard del Coordinador";
-    int currentPageSize = Context.Request.Query["pageSize"].ToString() != "" ? int.Parse(Context.Request.Query["pageSize"]) : 10;
+    int currentPageSize = Context.Request.Query["pageSize"].ToString() != ""
+        ? int.Parse(Context.Request.Query["pageSize"])
+        : 10;
 }
 
 @if (TempData["SuccessMessage"] != null)
@@ -35,8 +37,12 @@
                     <input type="date" name="reviewEndDate" value="@Model.ReviewEndDate?.ToString("yyyy-MM-dd")" class="form-control" />
                 </div>
                 <div class="col-md-2 d-flex gap-2">
-                    <button type="submit" class="btn btn-custom w-100"><i class="fas fa-filter"></i> <span class="btn-text">Filtrar</span></button>
-                    <a asp-action="Index" class="btn btn-outline-secondary" title="Limpiar"><i class="fas fa-times"></i></a>
+                    <button type="submit" class="btn btn-custom w-100">
+                        <i class="fas fa-filter"></i> <span class="btn-text">Filtrar</span>
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary" title="Limpiar">
+                        <i class="fas fa-times"></i>
+                    </a>
                 </div>
             </div>
         </form>
@@ -47,12 +53,12 @@
     <div class="card-header border-bottom-0 pt-3 px-3 pb-0">
         <ul class="nav nav-tabs card-header-tabs m-0" id="dashboardTabs" role="tablist">
             <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="pendientes-tab" data-bs-toggle="tab" data-bs-target="#pendientes" type="button" role="tab" aria-controls="pendientes" aria-selected="true">
+                <button class="nav-link active" id="pendientes-tab" data-bs-toggle="tab" data-bs-target="#pendientes" type="button" role="tab">
                     Pendientes de Revisar
                 </button>
             </li>
             <li class="nav-item" role="presentation">
-                <button class="nav-link" id="historial-tab" data-bs-toggle="tab" data-bs-target="#historial" type="button" role="tab" aria-controls="historial" aria-selected="false">
+                <button class="nav-link" id="historial-tab" data-bs-toggle="tab" data-bs-target="#historial" type="button" role="tab">
                     Historial de Revisiones
                 </button>
             </li>
@@ -63,16 +69,14 @@
         <div class="tab-content" id="dashboardTabsContent">
 
             <div class="tab-pane fade show active" id="pendientes" role="tabpanel" aria-labelledby="pendientes-tab">
-                <div class="p-3 bg-white border-bottom d-flex justify-content-end align-items-center gap-3 pagination-container">
+                <div class="p-3 bg-white border-bottom d-flex justify-content-end align-items-center gap-3">
                     <form asp-action="Index" method="get" class="d-flex align-items-center m-0">
                         <input type="hidden" name="searchString" value="@Model.CurrentSearch" />
                         <input type="hidden" name="reviewStartDate" value="@Model.ReviewStartDate?.ToString("yyyy-MM-dd")" />
                         <input type="hidden" name="reviewEndDate" value="@Model.ReviewEndDate?.ToString("yyyy-MM-dd")" />
-
                         <label class="me-2 small text-muted fw-bold mb-0">Mostrar:</label>
-                        <input type="number" name="pageSize" value="@currentPageSize" min="1" max="100" class="form-control form-control-sm text-center page-size-input auto-submit-input">
+                        <input type="number" name="pageSize" value="@currentPageSize" min="1" max="100" class="form-control form-control-sm text-center page-size-input auto-submit-input" style="width:70px;">
                     </form>
-
                     <div class="m-0">
                         @Html.PagedListPager(Model.PendientesDeRevisar, pagePendientes => Url.Action("Index", new { pagePendientes, searchString = Model.CurrentSearch, reviewStartDate = Model.ReviewStartDate, reviewEndDate = Model.ReviewEndDate, pageSize = currentPageSize }),
                         new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" }, PageClasses = new string[] { "page-link" }, UlElementClasses = new string[] { "pagination pagination-sm m-0" } })
@@ -81,42 +85,45 @@
 
                 <div class="coor-table-container">
                     <table class="coor-table">
-                        <thead class="coor-text-center coor-align-middle">
+                        <thead>
                             <tr>
                                 <th class="coor-sticky-th coor-col-program">Programa</th>
                                 <th class="coor-sticky-th d-none-mobile">No. Elemento/Riesgo</th>
                                 <th class="coor-sticky-th">Usuario</th>
-                                <th class="coor-sticky-th">Avance(Enlace)</th>
+                                <th class="coor-sticky-th">Avance</th>
                                 <th class="coor-sticky-th">Trimestre</th>
                                 <th class="coor-sticky-th d-none-mobile">Fecha Entrega</th>
                                 <th class="coor-sticky-th">Acción</th>
                             </tr>
                         </thead>
                         <tbody>
-                            @if (Model.PendientesDeRevisar != null && Model.PendientesDeRevisar.Any())
+                            @if (Model.PendientesDeRevisar?.Any() == true)
                             {
                                 foreach (var item in Model.PendientesDeRevisar)
                                 {
                                     var esPtci = item.ActionIdPtci != null;
                                     <tr>
-                                        <td class="coor-align-middle coor-text-center"><span class="badge @(esPtci ? "badge-ptci" : "badge-ptar")">@(esPtci ? "PTCI" : "PTAR")</span></td>
-                                        <td class="coor-align-middle coor-text-center d-none-mobile small text-muted">@(esPtci? item.ActionIdPtciNavigation?.Element?.ControlNumber : item.FactorIdPtarNavigation?.Risk?.RiskNumber)</td>
-                                        <td class="coor-align-middle coor-text-center fw-bold text-secondary">@item.User?.FirstName @item.User?.LastName</td>
-                                        <td class="coor-align-middle coor-text-center">
-                                            <!--<div class="progress mx-auto custom-progress-container">
-                                                <div class="progress-bar bg-info custom-progress-bar"></div>
-                                            </div>-->
-                                            <p class="text-muted">@item.Grade %</p>
+                                        <td><span class="badge @(esPtci ? "badge-ptci" : "badge-ptar")">@(esPtci ? "PTCI" : "PTAR")</span></td>
+                                        <td class="d-none-mobile small text-muted">@(esPtci? item.ActionIdPtciNavigation?.Element?.ControlNumber : item.FactorIdPtarNavigation?.Risk?.RiskNumber)</td>
+                                        <td class="fw-bold text-secondary">@item.User?.FirstName @item.User?.LastName</td>
+                                        <td><p class="text-muted mb-0">@item.Grade %</p></td>
+                                        <td class="small">@item.QuarterNumber</td>
+                                        <td class="d-none-mobile small">@item.SubmissionDate.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>
+                                            <a class="btn btn-sm px-3 btn-warning" asp-action="Review" asp-route-id="@item.DeliveryId">
+                                                <i class="fas fa-edit me-1"></i> Revisar
+                                            </a>
                                         </td>
-                                        <td class="coor-align-middle coor-text-center d-none-mobile small">@item.QuarterNumber</td>
-                                        <td class="coor-align-middle coor-text-center d-none-mobile small">@item.SubmissionDate.ToString("dd/MM/yyyy HH:mm")</td>
-                                        <td class="coor-align-middle coor-text-center"><a class="btn btn-sm px-3 btn-warning" asp-action="Review" asp-route-id="@item.DeliveryId"><i class="fas fa-edit me-1"></i> Revisar</a></td>
                                     </tr>
                                 }
                             }
                             else
                             {
-                                <tr><td colspan="7" class="coor-text-center py-5 text-muted"><i class="fas fa-inbox fa-2x mb-3 d-block"></i> No hay entregas pendientes de revisión.</td></tr>
+                                <tr>
+                                    <td colspan="7" class="py-5 text-muted text-center">
+                                        <i class="fas fa-inbox fa-2x mb-3 d-block"></i> No hay entregas pendientes de revisión.
+                                    </td>
+                                </tr>
                             }
                         </tbody>
                     </table>
@@ -131,20 +138,19 @@
                         </a>
                         <form asp-action="HideReviewHistory" method="post" class="form-confirm-archive">
                             @Html.AntiForgeryToken()
-                            <button type="submit" class="btn btn-sm btn-outline-danger"><i class="fas fa-archive"></i> <span class="d-none d-md-inline">Archivar</span></button>
+                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                <i class="fas fa-archive"></i> <span class="d-none d-md-inline">Archivar</span>
+                            </button>
                         </form>
                     </div>
-
-                    <div class="d-flex align-items-center gap-3 pagination-container">
+                    <div class="d-flex align-items-center gap-3">
                         <form asp-action="Index" method="get" class="d-flex align-items-center m-0">
                             <input type="hidden" name="searchString" value="@Model.CurrentSearch" />
                             <input type="hidden" name="reviewStartDate" value="@Model.ReviewStartDate?.ToString("yyyy-MM-dd")" />
                             <input type="hidden" name="reviewEndDate" value="@Model.ReviewEndDate?.ToString("yyyy-MM-dd")" />
-
                             <label class="me-2 small text-muted fw-bold mb-0">Mostrar:</label>
-                            <input type="number" name="pageSize" value="@currentPageSize" min="1" max="100" class="form-control form-control-sm text-center page-size-input auto-submit-input">
+                            <input type="number" name="pageSize" value="@currentPageSize" min="1" max="100" class="form-control form-control-sm text-center page-size-input auto-submit-input" style="width:70px;">
                         </form>
-
                         <div class="m-0">
                             @Html.PagedListPager(Model.HistorialDeRevisiones, pageHistorial => Url.Action("Index", new { pageHistorial, searchString = Model.CurrentSearch, reviewStartDate = Model.ReviewStartDate, reviewEndDate = Model.ReviewEndDate, pageSize = currentPageSize }),
                             new PagedListRenderOptions { LiElementClasses = new string[] { "page-item" }, PageClasses = new string[] { "page-link" }, UlElementClasses = new string[] { "pagination pagination-sm m-0" } })
@@ -154,7 +160,7 @@
 
                 <div class="coor-table-container">
                     <table class="coor-table">
-                        <thead class="coor-text-center coor-align-middle">
+                        <thead>
                             <tr>
                                 <th class="coor-sticky-th coor-col-program">Programa</th>
                                 <th class="coor-sticky-th d-none-mobile">No. Elemento</th>
@@ -166,25 +172,29 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @if (Model.HistorialDeRevisiones != null && Model.HistorialDeRevisiones.Any())
+                            @if (Model.HistorialDeRevisiones?.Any() == true)
                             {
                                 foreach (var item in Model.HistorialDeRevisiones)
                                 {
                                     var esPtci = item.ActionIdPtci != null;
                                     <tr>
-                                        <td class="coor-align-middle coor-text-center"><span class="badge @(esPtci ? "badge-ptci" : "badge-ptar")">@(esPtci ? "PTCI" : "PTAR")</span></td>
-                                        <td class="coor-align-middle coor-text-center d-none-mobile small text-muted">@(esPtci? item.ActionIdPtciNavigation?.Element?.ControlNumber : item.FactorIdPtarNavigation?.Risk?.RiskNumber)</td>
-                                        <td class="coor-align-middle coor-text-center text-secondary">@item.User?.FirstName @item.User?.LastName</td>
-                                        <td class="coor-align-middle coor-text-center d-none-mobile small">@item.QuarterNumber</td>
-                                        <td class="coor-align-middle coor-text-center d-none-mobile small">@item.ReviewDate?.ToString("dd/MM/yyyy HH:mm")</td>
-                                        <td class="coor-align-middle coor-text-center"><span class="badge @(item.Status == "Aprobado" ? "bg-success" : "bg-warning text-dark")">@item.Status</span></td>
-                                        <td class="coor-align-middle coor-text-center"><a class="btn btn-sm px-3 btn-warning" asp-action="Review" asp-route-id="@item.DeliveryId"><i class="fas fa-eye me-1"></i> Revisar</a></td>
+                                        <td><span class="badge @(esPtci ? "badge-ptci" : "badge-ptar")">@(esPtci ? "PTCI" : "PTAR")</span></td>
+                                        <td class="d-none-mobile small text-muted">@(esPtci? item.ActionIdPtciNavigation?.Element?.ControlNumber : item.FactorIdPtarNavigation?.Risk?.RiskNumber)</td>
+                                        <td class="text-secondary">@item.User?.FirstName @item.User?.LastName</td>
+                                        <td class="small">@item.QuarterNumber</td>
+                                        <td class="small d-none-mobile">@item.ReviewDate?.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td><span class="badge @(item.Status == "Aprobado" ? "bg-success" : "bg-warning text-dark")">@item.Status</span></td>
+                                        <td>
+                                            <a class="btn btn-sm px-3 btn-warning" asp-action="Review" asp-route-id="@item.DeliveryId">
+                                                <i class="fas fa-eye me-1"></i> Revisar
+                                            </a>
+                                        </td>
                                     </tr>
                                 }
                             }
                             else
                             {
-                                <tr><td colspan="7" class="coor-text-center py-5 text-muted">No se encontraron registros en el historial.</td></tr>
+                                <tr><td colspan="7" class="py-5 text-muted text-center">No se encontraron registros en el historial.</td></tr>
                             }
                         </tbody>
                     </table>
@@ -195,17 +205,22 @@
     </div>
 </div>
 
-<button id="backToTopBtn" class="btn-back-to-top" title="Ir arriba"><i class="fas fa-arrow-up"></i></button>
+<button id="backToTopBtn" class="btn-back-to-top" title="Ir arriba">
+    <i class="fas fa-arrow-up"></i>
+</button>
 
 @section Scripts {
     <script>
         $(function() {
             const activeTab = localStorage.getItem('activeDashboardTab');
-            if (activeTab) new bootstrap.Tab(document.querySelector(activeTab)).show();
+            if (activeTab) {
+                const tabEl = document.querySelector(activeTab);
+                if (tabEl) new bootstrap.Tab(tabEl).show();
+            }
 
-            $('button[data-bs-toggle="tab"]').on('shown.bs.tab', e => {
-                const isPendientes = $(e.target).data('bs-target') === '#pendientes';
-                localStorage.setItem('activeDashboardTab', isPendientes ? '#pendientes-tab' : '#historial-tab');
+            $('button[data-bs-toggle="tab"]').on('shown.bs.tab', function(e) {
+                const targetId = $(e.target).attr('id');
+                localStorage.setItem('activeDashboardTab', '#' + targetId);
             });
 
             $(window).scroll(function() {
@@ -213,16 +228,16 @@
             });
 
             $('#backToTopBtn').on('click', function() {
-                window.scrollTo({ top: 0, behavior: 'auto' });
+                window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
             $('.auto-submit-input').on('change', function() {
-                this.form.submit();
+                $(this).closest('form').submit();
             });
 
             $('.form-confirm-archive').on('submit', function() {
-                return confirm('¿Desea archivar el historial?');
+                return confirm('¿Está seguro de que desea archivar el historial de revisiones seleccionado?');
             });
         });
     </script>
-git}
+}

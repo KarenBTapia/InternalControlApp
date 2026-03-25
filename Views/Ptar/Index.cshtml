@@ -1,5 +1,6 @@
 ﻿@model IEnumerable<InternalControlApp.Models.RisksPtar>
 @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
 @{
     ViewData["Title"] = "Panel PTAR";
     var roleName = HttpContextAccessor.HttpContext!.Session.GetString("RoleName");
@@ -10,19 +11,43 @@
 @section HeaderButtons {
     @if (roleName == "Coordinador" || roleName == "Superadmin")
     {
-        <a class="btn btn-primary shadow-sm" asp-controller="Ptar" asp-action="Create"><i class="fa-solid fa-file-circle-exclamation"></i> Agregar Riesgo</a>
-        <a class="btn shadow-sm btn-export-pdf" asp-controller="Ptar" asp-action="ExportToPdf"><i class="fas fa-file-pdf"></i> Exportar a PDF</a>
-        <a class="btn shadow-sm btn-export-excel" asp-controller="Ptar" asp-action="ExportToExcel"><i class="fas fa-file-excel"></i> Exportar a Excel</a>
+        <a class="btn btn-primary shadow-sm" asp-controller="Ptar" asp-action="Create">
+            <i class="fa-solid fa-file-circle-exclamation"></i> Agregar Riesgo
+        </a>
+        <a class="btn shadow-sm btn-export-pdf" asp-controller="Ptar" asp-action="ExportToPdf">
+            <i class="fas fa-file-pdf"></i> Exportar a PDF
+        </a>
+        <a class="btn shadow-sm btn-export-excel" asp-controller="Ptar" asp-action="ExportToExcel">
+            <i class="fas fa-file-excel"></i> Exportar a Excel
+        </a>
     }
-    <a class="btn btn-custom shadow-sm" asp-controller="@homeController" asp-action="Index"><i class="fas fa-arrow-left"></i> Volver</a>
+    <a class="btn btn-custom shadow-sm" asp-controller="@homeController" asp-action="Index">
+        <i class="fas fa-arrow-left"></i> Volver
+    </a>
 }
+
+<div class="d-flex justify-content-start mb-2">
+    <form method="get" class="d-flex align-items-center gap-2">
+        <label class="fw-semibold mb-0">Filtrar por año:</label>
+
+        <select name="year"
+                asp-items="ViewBag.YearList"
+                class="form-select form-select-sm w-auto"
+                onchange="this.form.submit()">
+        </select>
+    </form>
+</div>
 
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-header bg-white py-4 border-bottom text-center">
         <h1 class="m-0 table-title">Panel de Trabajo de Administración de Riesgos (PTAR)</h1>
+        <br>
+        <br>
     </div>
+
     <div class="table-responsive" id="realTableContainer">
         <table class="table table-hover mb-0" id="mainTable">
+
             <thead class="text-center align-middle">
                 <tr>
                     <th rowspan="2" class="sticky-th">No. Riesgo</th>
@@ -46,6 +71,7 @@
                     <th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">4to Trim</th>
                     <th rowspan="2" class="sticky-th">Acción</th>
                 </tr>
+
                 <tr>
                     @for (int i = 0; i < 4; i++)
                     {
@@ -57,13 +83,17 @@
                     }
                 </tr>
             </thead>
+
             <tbody>
                 @if (!Model.Any())
                 {
                     <tr>
-                        <td colspan="@totalColumns" class="text-center text-muted align-middle py-4">No hay riesgos registrados o asignados en el programa PTAR.</td>
+                        <td colspan="@totalColumns" class="text-center text-muted align-middle py-4">
+                            No hay riesgos registrados o asignados en el programa PTAR.
+                        </td>
                     </tr>
                 }
+
                 @foreach (var risk in Model)
                 {
                     var factors = risk.RiskFactorsPtars.ToList();
@@ -74,6 +104,7 @@
                         for (int i = 0; i < factors.Count; i++)
                         {
                             var factor = factors[i];
+
                             <tr>
                                 @if (i == 0)
                                 {
@@ -85,35 +116,62 @@
                                     <td rowspan="@rowSpanCount" class="align-middle text-center fw-bold">@risk.Quadrant</td>
                                     <td rowspan="@rowSpanCount" class="align-middle">@risk.Strategy</td>
                                 }
+
                                 <td class="align-middle text-center">@factor.FactorNumber</td>
                                 <td class="align-middle cell-wide">@factor.FactorDescription</td>
                                 <td class="align-middle cell-wide">@factor.ControlAction</td>
                                 <td class="align-middle cell-mid">@(factor.Unit?.UnitName)</td>
-                                <td class="align-middle no-wrap cell-mid">@(factor.ResponsibleUser != null ? $"{factor.ResponsibleUser.FirstName} {factor.ResponsibleUser.LastName}" : "")</td>
+                                <td class="align-middle no-wrap cell-mid">
+                                    @(factor.ResponsibleUser != null ? $"{factor.ResponsibleUser.FirstName} {factor.ResponsibleUser.LastName}" : "")
+                                </td>
                                 <td class="align-middle text-center no-wrap">@factor.StartDate?.ToString("dd/MM/yyyy")</td>
                                 <td class="align-middle text-center no-wrap">@factor.EndDate?.ToString("dd/MM/yyyy")</td>
                                 <td class="align-middle cell-large">@factor.VerificationMeans</td>
 
-                                <td class="align-middle text-center fw-bold text-primary no-wrap">@(factor.Quarter1Grade.HasValue ? $"{factor.Quarter1Grade.Value:F0}%" : "")</td>
+                                <td class="align-middle text-center fw-bold text-primary no-wrap">
+                                    @(factor.Quarter1Grade.HasValue ? $"{factor.Quarter1Grade.Value:F0}%" : "")
+                                </td>
+
                                 @if (roleName != "Enlace")
                                 {
-                                    <td class="align-middle text-center text-secondary no-wrap">@(factor.Quarter1GradeOic.HasValue ? $"{factor.Quarter1GradeOic.Value:F0}%" : "")</td>
+                                    <td class="align-middle text-center text-secondary no-wrap">
+                                        @(factor.Quarter1GradeOic.HasValue ? $"{factor.Quarter1GradeOic.Value:F0}%" : "")
+                                    </td>
                                 }
-                                <td class="align-middle text-center fw-bold text-primary no-wrap">@(factor.Quarter2Grade.HasValue ? $"{factor.Quarter2Grade.Value:F0}%" : "")</td>
+
+                                <td class="align-middle text-center fw-bold text-primary no-wrap">
+                                    @(factor.Quarter2Grade.HasValue ? $"{factor.Quarter2Grade.Value:F0}%" : "")
+                                </td>
+
                                 @if (roleName != "Enlace")
                                 {
-                                    <td class="align-middle text-center text-secondary no-wrap">@(factor.Quarter2GradeOic.HasValue ? $"{factor.Quarter2GradeOic.Value:F0}%" : "")</td>
+                                    <td class="align-middle text-center text-secondary no-wrap">
+                                        @(factor.Quarter2GradeOic.HasValue ? $"{factor.Quarter2GradeOic.Value:F0}%" : "")
+                                    </td>
                                 }
-                                <td class="align-middle text-center fw-bold text-primary no-wrap">@(factor.Quarter3Grade.HasValue ? $"{factor.Quarter3Grade.Value:F0}%" : "")</td>
+
+                                <td class="align-middle text-center fw-bold text-primary no-wrap">
+                                    @(factor.Quarter3Grade.HasValue ? $"{factor.Quarter3Grade.Value:F0}%" : "")
+                                </td>
+
                                 @if (roleName != "Enlace")
                                 {
-                                    <td class="align-middle text-center text-secondary no-wrap">@(factor.Quarter3GradeOic.HasValue ? $"{factor.Quarter3GradeOic.Value:F0}%" : "")</td>
+                                    <td class="align-middle text-center text-secondary no-wrap">
+                                        @(factor.Quarter3GradeOic.HasValue ? $"{factor.Quarter3GradeOic.Value:F0}%" : "")
+                                    </td>
                                 }
-                                <td class="align-middle text-center fw-bold text-primary no-wrap">@(factor.Quarter4Grade.HasValue ? $"{factor.Quarter4Grade.Value:F0}%" : "")</td>
+
+                                <td class="align-middle text-center fw-bold text-primary no-wrap">
+                                    @(factor.Quarter4Grade.HasValue ? $"{factor.Quarter4Grade.Value:F0}%" : "")
+                                </td>
+
                                 @if (roleName != "Enlace")
                                 {
-                                    <td class="align-middle text-center text-secondary no-wrap">@(factor.Quarter4GradeOic.HasValue ? $"{factor.Quarter4GradeOic.Value:F0}%" : "")</td>
+                                    <td class="align-middle text-center text-secondary no-wrap">
+                                        @(factor.Quarter4GradeOic.HasValue ? $"{factor.Quarter4GradeOic.Value:F0}%" : "")
+                                    </td>
                                 }
+
                                 @if (i == 0)
                                 {
                                     <td rowspan="@rowSpanCount" class="text-center align-middle">
@@ -132,7 +190,9 @@
                                         }
                                         else if (roleName == "Enlace")
                                         {
-                                            <a asp-action="Upload" asp-route-id="@risk.RiskId" class="btn btn-sm btn-success d-block"><i class="fas fa-upload"></i> Evidencia</a>
+                                            <a asp-action="Upload" asp-route-id="@risk.RiskId" class="btn btn-sm btn-success d-block">
+                                                <i class="fas fa-upload"></i> Evidencia
+                                            </a>
                                         }
                                     </td>
                                 }
@@ -149,7 +209,9 @@
                             <td class="align-middle text-center">@risk.OccurrenceProbability</td>
                             <td class="align-middle text-center fw-bold">@risk.Quadrant</td>
                             <td class="align-middle">@risk.Strategy</td>
-                            <td colspan="@(roleName == "Enlace" ? 12 : 16)" class="text-center text-muted align-middle py-3">No hay factores de riesgo asignados.</td>
+                            <td colspan="@(roleName == "Enlace" ? 12 : 16)" class="text-center text-muted align-middle py-3">
+                                No hay factores de riesgo asignados.
+                            </td>
                             <td class="text-center align-middle">
                                 @if (roleName == "Coordinador" || roleName == "Superadmin")
                                 {
@@ -173,8 +235,13 @@
     </div>
 </div>
 
-<div class="floating-scrollbar" id="fakeScrollContainer"><div style="height:1px;" id="fakeScrollContent"></div></div>
-<button id="backToTopBtn" class="btn-back-to-top"><i class="fas fa-arrow-up"></i></button>
+<div class="floating-scrollbar" id="fakeScrollContainer">
+    <div style="height:1px;" id="fakeScrollContent"></div>
+</div>
+
+<button id="backToTopBtn" class="btn-back-to-top">
+    <i class="fas fa-arrow-up"></i>
+</button>
 
 @section Scripts {
     <script>
@@ -187,14 +254,21 @@
 
             const resizeFakeScroll = () => {
                 fakeScrollContent.style.width = `${table.scrollWidth}px`;
-                fakeScrollContainer.style.display = table.scrollWidth <= tableContainer.clientWidth ? 'none' : 'block';
+                fakeScrollContainer.style.display =
+                    table.scrollWidth <= tableContainer.clientWidth ? 'none' : 'block';
             };
 
-            fakeScrollContainer.addEventListener("scroll", () => tableContainer.scrollLeft = fakeScrollContainer.scrollLeft);
-            tableContainer.addEventListener("scroll", () => fakeScrollContainer.scrollLeft = tableContainer.scrollLeft);
+            fakeScrollContainer.addEventListener("scroll", () =>
+                tableContainer.scrollLeft = fakeScrollContainer.scrollLeft
+            );
+
+            tableContainer.addEventListener("scroll", () =>
+                fakeScrollContainer.scrollLeft = tableContainer.scrollLeft
+            );
+
             window.addEventListener("resize", resizeFakeScroll);
             resizeFakeScroll();
-            
+
             window.addEventListener("scroll", () => {
                 upBtn.style.display = window.scrollY > 300 ? "flex" : "none";
             });
