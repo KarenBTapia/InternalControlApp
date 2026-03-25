@@ -6,202 +6,245 @@
     var homeController = (roleName == "Coordinador" || roleName == "Superadmin") ? "Coordinador" : "Enlace";
     int totalColumns = 16 + (roleName == "Enlace" ? 4 : 8);
 }
-
+ 
+@section Styles {
+<style>
+        body { font-family: 'Inter', system-ui, -apple-system, sans-serif; background-color: #f4f6f9; overflow-y: auto; overflow-x: hidden; padding-bottom: 40px; }
+        .btn-custom { background-color: #00A987; border-color: #00A987; color: white; transition: all 0.2s ease; }
+        .btn-custom:hover { background-color: #008f72; border-color: #008f72; color: white; box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .btn-export-pdf { background-color: #E03E1A; color: white; }
+        .btn-export-excel { background-color: #247147; color: white; }
+ 
+        .table-title { color: #2c3e50; font-weight: 600; font-size: 1.75rem; }
+        #realTableContainer { width: 100%; overflow-x: auto; scrollbar-width: none; -ms-overflow-style: none; background: white; border-radius: 0 0 5px 5px; }
+        #realTableContainer::-webkit-scrollbar { display: none; }
+        table { min-width: 2800px; font-size: 0.80rem; background-color: white; border-collapse: separate; border-spacing: 0; color: #333; }
+        th, td { padding: 10px; border-bottom: 1px solid #eee; border-right: 1px solid #f0f0f0; }
+        th:last-child, td:last-child { padding-right: 60px; }
+        .sticky-th, .sticky-th-2 { position: sticky; background-color: #eff3f8; border-bottom: 2px solid #dde2e6; }
+        .sticky-th { top: 0; color: #495057; font-weight: 700; z-index: 100; text-transform: uppercase; font-size: 0.75rem; }
+        .sticky-th-2 { top: 45px; z-index: 90; }
+        tbody tr:hover { background-color: #f8f9fa !important; }
+        .align-middle { vertical-align: middle !important; }
+        .text-center { text-align: center !important; }
+        .no-wrap { white-space: nowrap; }
+        .cell-wide { min-width: 250px; }
+        .cell-mid { min-width: 150px; }
+        .cell-large { min-width: 200px; }
+ 
+        .floating-scrollbar { position: fixed; bottom: 0; left: 0; width: 100%; height: 25px; overflow-x: auto; overflow-y: hidden; z-index: 9999; background: #f8f9fa; border-top: 1px solid #dee2e6; }
+        .floating-scrollbar::-webkit-scrollbar { height: 25px; }
+        .floating-scrollbar::-webkit-scrollbar-thumb { background-color: #adb5bd; border-radius: 12px; border: 4px solid #f8f9fa; }
+        .btn-back-to-top { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; border-radius: 50%; display: none; align-items: center; justify-content: center; z-index: 9999; background: #00A987; color: white; border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3); cursor: pointer; }
+</style>
+}
+ 
 @section HeaderButtons {
     @if (roleName == "Coordinador" || roleName == "Superadmin")
     {
-        <a class="btn btn-primary shadow-sm" asp-controller="Ptar" asp-action="Create"><i class="fa-solid fa-file-circle-exclamation"></i> Agregar Riesgo</a>
-        <a class="btn shadow-sm btn-export-pdf" asp-controller="Ptar" asp-action="ExportToPdf"><i class="fas fa-file-pdf"></i> Exportar a PDF</a>
-        <a class="btn shadow-sm btn-export-excel" asp-controller="Ptar" asp-action="ExportToExcel"><i class="fas fa-file-excel"></i> Exportar a Excel</a>
+<a class="btn btn-primary shadow-sm" asp-controller="Ptar" asp-action="Create"><i class="fa-solid fa-file-circle-exclamation"></i> Agregar Riesgo</a>
+<a class="btn shadow-sm btn-export-pdf" asp-controller="Ptar" asp-action="ExportToPdf"><i class="fas fa-file-pdf"></i> Exportar a PDF</a>
+<a class="btn shadow-sm btn-export-excel" asp-controller="Ptar" asp-action="ExportToExcel"><i class="fas fa-file-excel"></i> Exportar a Excel</a>
     }
-    <a class="btn btn-custom shadow-sm" asp-controller="@homeController" asp-action="Index"><i class="fas fa-arrow-left"></i> Volver</a>
+<a class="btn btn-custom shadow-sm" asp-controller="@homeController" asp-action="Index"><i class="fas fa-arrow-left"></i> Volver</a>
 }
 
+<div class="d-flex justify-content-start mb-2">
+    <form method="get" class="d-flex align-items-center gap-2">
+        <label class="fw-semibold mb-0">Filtrar por año:</label>
+
+        <select name="year"
+                asp-items="ViewBag.YearList"
+                class="form-select form-select-sm w-auto"
+                onchange="this.form.submit()">
+        </select>
+    </form>
+</div>
+ 
 <div class="card shadow-sm border-0 mb-4">
-    <div class="card-header bg-white py-4 border-bottom text-center">
-        <h1 class="m-0 table-title">Panel de Trabajo de Administración de Riesgos (PTAR)</h1>
-    </div>
-    <div class="table-responsive" id="realTableContainer">
-        <table class="table table-hover mb-0" id="mainTable">
-            <thead class="text-center align-middle">
-                <tr>
-                    <th rowspan="2" class="sticky-th">No. Riesgo</th>
-                    <th rowspan="2" class="sticky-th">Descripción del Riesgo</th>
-                    <th rowspan="2" class="sticky-th">Clasificación</th>
-                    <th rowspan="2" class="sticky-th">Grado de Impacto</th>
-                    <th rowspan="2" class="sticky-th">Prob. de Ocurrencia</th>
-                    <th rowspan="2" class="sticky-th">Cuadrante</th>
-                    <th rowspan="2" class="sticky-th">Estrategia</th>
-                    <th rowspan="2" class="sticky-th">No. Factor</th>
-                    <th rowspan="2" class="sticky-th">Factor de Riesgo</th>
-                    <th rowspan="2" class="sticky-th">Acción de Control</th>
-                    <th rowspan="2" class="sticky-th">Unidad Administrativa</th>
-                    <th rowspan="2" class="sticky-th">Responsable</th>
-                    <th rowspan="2" class="sticky-th">Fecha de Inicio</th>
-                    <th rowspan="2" class="sticky-th">Fecha de Término</th>
-                    <th rowspan="2" class="sticky-th">Medios de Verificación</th>
-                    <th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">1er Trim</th>
-                    <th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">2do Trim</th>
-                    <th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">3er Trim</th>
-                    <th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">4to Trim</th>
-                    <th rowspan="2" class="sticky-th">Acción</th>
-                </tr>
-                <tr>
+<div class="card-header bg-white py-4 border-bottom text-center">
+<h1 class="m-0 table-title">Panel de Trabajo de Administración de Riesgos (PTAR)</h1>
+</div>
+<div class="table-responsive" id="realTableContainer">
+<table class="table table-hover mb-0" id="mainTable">
+<thead class="text-center align-middle">
+<tr>
+<th rowspan="2" class="sticky-th">No. Riesgo</th>
+<th rowspan="2" class="sticky-th">Descripción del Riesgo</th>
+<th rowspan="2" class="sticky-th">Clasificación</th>
+<th rowspan="2" class="sticky-th">Grado de Impacto</th>
+<th rowspan="2" class="sticky-th">Prob. de Ocurrencia</th>
+<th rowspan="2" class="sticky-th">Cuadrante</th>
+<th rowspan="2" class="sticky-th">Estrategia</th>
+<th rowspan="2" class="sticky-th">No. Factor</th>
+<th rowspan="2" class="sticky-th">Factor de Riesgo</th>
+<th rowspan="2" class="sticky-th">Acción de Control</th>
+<th rowspan="2" class="sticky-th">Unidad Administrativa</th>
+<th rowspan="2" class="sticky-th">Responsable</th>
+<th rowspan="2" class="sticky-th">Fecha de Inicio</th>
+<th rowspan="2" class="sticky-th">Fecha de Término</th>
+<th rowspan="2" class="sticky-th">Medios de Verificación</th>
+<th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">1er Trim</th>
+<th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">2do Trim</th>
+<th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">3er Trim</th>
+<th colspan="@((roleName == "Enlace") ? 1 : 2)" class="sticky-th">4to Trim</th>
+<th rowspan="2" class="sticky-th">Acción</th>
+</tr>
+<tr>
                     @for (int i = 0; i < 4; i++)
                     {
-                        <th class="sticky-th-2">Enl.</th>
+<th class="sticky-th-2">Enl.</th>
                         @if (roleName != "Enlace")
                         {
-                            <th class="sticky-th-2">Com.</th>
+<th class="sticky-th-2">Com.</th>
                         }
                     }
-                </tr>
-            </thead>
-            <tbody>
+</tr>
+</thead>
+<tbody>
                 @if (!Model.Any())
                 {
-                    <tr>
-                        <td colspan="@totalColumns" class="text-center text-muted align-middle py-4">No hay riesgos registrados o asignados en el programa PTAR.</td>
-                    </tr>
+<tr>
+<td colspan="@totalColumns" class="text-center text-muted align-middle py-4">No hay riesgos registrados o asignados en el programa PTAR.</td>
+</tr>
                 }
                 @foreach (var risk in Model)
                 {
                     var factors = risk.RiskFactorsPtars.ToList();
                     var rowSpanCount = factors.Any() ? factors.Count : 1;
-
+ 
                     if (factors.Any())
                     {
                         for (int i = 0; i < factors.Count; i++)
                         {
                             var factor = factors[i];
-                            <tr>
+<tr>
                                 @if (i == 0)
                                 {
-                                    <td rowspan="@rowSpanCount" class="align-middle text-center fw-bold">@risk.RiskNumber</td>
-                                    <td rowspan="@rowSpanCount" class="align-middle cell-wide">@risk.Description</td>
-                                    <td rowspan="@rowSpanCount" class="align-middle text-center">@risk.RiskClassification</td>
-                                    <td rowspan="@rowSpanCount" class="align-middle text-center">@risk.ImpactGrade</td>
-                                    <td rowspan="@rowSpanCount" class="align-middle text-center">@risk.OccurrenceProbability</td>
-                                    <td rowspan="@rowSpanCount" class="align-middle text-center fw-bold">@risk.Quadrant</td>
-                                    <td rowspan="@rowSpanCount" class="align-middle">@risk.Strategy</td>
+<td rowspan="@rowSpanCount" class="align-middle text-center fw-bold">@risk.RiskNumber</td>
+<td rowspan="@rowSpanCount" class="align-middle cell-wide">@risk.Description</td>
+<td rowspan="@rowSpanCount" class="align-middle text-center">@risk.RiskClassification</td>
+<td rowspan="@rowSpanCount" class="align-middle text-center">@risk.ImpactGrade</td>
+<td rowspan="@rowSpanCount" class="align-middle text-center">@risk.OccurrenceProbability</td>
+<td rowspan="@rowSpanCount" class="align-middle text-center fw-bold">@risk.Quadrant</td>
+<td rowspan="@rowSpanCount" class="align-middle">@risk.Strategy</td>
                                 }
-                                <td class="align-middle text-center">@factor.FactorNumber</td>
-                                <td class="align-middle cell-wide">@factor.FactorDescription</td>
-                                <td class="align-middle cell-wide">@factor.ControlAction</td>
-                                <td class="align-middle cell-mid">@(factor.Unit?.UnitName)</td>
-                                <td class="align-middle no-wrap cell-mid">@(factor.ResponsibleUser != null ? $"{factor.ResponsibleUser.FirstName} {factor.ResponsibleUser.LastName}" : "")</td>
-                                <td class="align-middle text-center no-wrap">@factor.StartDate?.ToString("dd/MM/yyyy")</td>
-                                <td class="align-middle text-center no-wrap">@factor.EndDate?.ToString("dd/MM/yyyy")</td>
-                                <td class="align-middle cell-large">@factor.VerificationMeans</td>
-
+<td class="align-middle text-center">@factor.FactorNumber</td>
+<td class="align-middle cell-wide">@factor.FactorDescription</td>
+<td class="align-middle cell-wide">@factor.ControlAction</td>
+<td class="align-middle cell-mid">@(factor.Unit?.UnitName)</td>
+<td class="align-middle no-wrap cell-mid">@(factor.ResponsibleUser != null ? $"{factor.ResponsibleUser.FirstName} {factor.ResponsibleUser.LastName}" : "")</td>
+<td class="align-middle text-center no-wrap">@factor.StartDate?.ToString("dd/MM/yyyy")</td>
+<td class="align-middle text-center no-wrap">@factor.EndDate?.ToString("dd/MM/yyyy")</td>
+<td class="align-middle cell-large">@factor.VerificationMeans</td>
+ 
                                 <td class="align-middle text-center fw-bold text-primary no-wrap">@(factor.Quarter1Grade.HasValue ? $"{factor.Quarter1Grade.Value:F0}%" : "")</td>
                                 @if (roleName != "Enlace")
                                 {
-                                    <td class="align-middle text-center text-secondary no-wrap">@(factor.Quarter1GradeOic.HasValue ? $"{factor.Quarter1GradeOic.Value:F0}%" : "")</td>
+<td class="align-middle text-center text-secondary no-wrap">@(factor.Quarter1GradeOic.HasValue ? $"{factor.Quarter1GradeOic.Value:F0}%" : "")</td>
                                 }
-                                <td class="align-middle text-center fw-bold text-primary no-wrap">@(factor.Quarter2Grade.HasValue ? $"{factor.Quarter2Grade.Value:F0}%" : "")</td>
+<td class="align-middle text-center fw-bold text-primary no-wrap">@(factor.Quarter2Grade.HasValue ? $"{factor.Quarter2Grade.Value:F0}%" : "")</td>
                                 @if (roleName != "Enlace")
                                 {
-                                    <td class="align-middle text-center text-secondary no-wrap">@(factor.Quarter2GradeOic.HasValue ? $"{factor.Quarter2GradeOic.Value:F0}%" : "")</td>
+<td class="align-middle text-center text-secondary no-wrap">@(factor.Quarter2GradeOic.HasValue ? $"{factor.Quarter2GradeOic.Value:F0}%" : "")</td>
                                 }
-                                <td class="align-middle text-center fw-bold text-primary no-wrap">@(factor.Quarter3Grade.HasValue ? $"{factor.Quarter3Grade.Value:F0}%" : "")</td>
+<td class="align-middle text-center fw-bold text-primary no-wrap">@(factor.Quarter3Grade.HasValue ? $"{factor.Quarter3Grade.Value:F0}%" : "")</td>
                                 @if (roleName != "Enlace")
                                 {
-                                    <td class="align-middle text-center text-secondary no-wrap">@(factor.Quarter3GradeOic.HasValue ? $"{factor.Quarter3GradeOic.Value:F0}%" : "")</td>
+<td class="align-middle text-center text-secondary no-wrap">@(factor.Quarter3GradeOic.HasValue ? $"{factor.Quarter3GradeOic.Value:F0}%" : "")</td>
                                 }
-                                <td class="align-middle text-center fw-bold text-primary no-wrap">@(factor.Quarter4Grade.HasValue ? $"{factor.Quarter4Grade.Value:F0}%" : "")</td>
+<td class="align-middle text-center fw-bold text-primary no-wrap">@(factor.Quarter4Grade.HasValue ? $"{factor.Quarter4Grade.Value:F0}%" : "")</td>
                                 @if (roleName != "Enlace")
                                 {
-                                    <td class="align-middle text-center text-secondary no-wrap">@(factor.Quarter4GradeOic.HasValue ? $"{factor.Quarter4GradeOic.Value:F0}%" : "")</td>
+<td class="align-middle text-center text-secondary no-wrap">@(factor.Quarter4GradeOic.HasValue ? $"{factor.Quarter4GradeOic.Value:F0}%" : "")</td>
                                 }
                                 @if (i == 0)
                                 {
-                                    <td rowspan="@rowSpanCount" class="text-center align-middle">
+<td rowspan="@rowSpanCount" class="text-center align-middle">
                                         @if (roleName == "Coordinador" || roleName == "Superadmin")
                                         {
-                                            <div class="d-flex justify-content-center gap-2">
-                                                <a asp-controller="Ptar" asp-action="Edit" asp-route-id="@risk.RiskId" class="btn btn-sm btn-outline-primary" title="Editar">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <form asp-controller="Ptar" asp-action="Delete" asp-route-id="@risk.RiskId" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este Riesgo y todos sus factores asociados?');">
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </button>
-                                                </form>
-                                            </div>
+<div class="d-flex justify-content-center gap-2">
+<a asp-controller="Ptar" asp-action="Edit" asp-route-id="@risk.RiskId" class="btn btn-sm btn-outline-primary" title="Editar">
+<i class="fas fa-edit"></i>
+</a>
+<form asp-controller="Ptar" asp-action="Delete" asp-route-id="@risk.RiskId" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este Riesgo y todos sus factores asociados?');">
+<button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+<i class="fas fa-trash-alt"></i>
+</button>
+</form>
+</div>
                                         }
                                         else if (roleName == "Enlace")
                                         {
-                                            <a asp-action="Upload" asp-route-id="@risk.RiskId" class="btn btn-sm btn-success d-block"><i class="fas fa-upload"></i> Evidencia</a>
+<a asp-action="Upload" asp-route-id="@risk.RiskId" class="btn btn-sm btn-success d-block"><i class="fas fa-upload"></i> Evidencia</a>
                                         }
-                                    </td>
+</td>
                                 }
-                            </tr>
+</tr>
                         }
                     }
                     else
                     {
-                        <tr>
-                            <td class="align-middle text-center fw-bold">@risk.RiskNumber</td>
-                            <td class="align-middle cell-wide">@risk.Description</td>
-                            <td class="align-middle text-center">@risk.RiskClassification</td>
-                            <td class="align-middle text-center">@risk.ImpactGrade</td>
-                            <td class="align-middle text-center">@risk.OccurrenceProbability</td>
-                            <td class="align-middle text-center fw-bold">@risk.Quadrant</td>
-                            <td class="align-middle">@risk.Strategy</td>
-                            <td colspan="@(roleName == "Enlace" ? 12 : 16)" class="text-center text-muted align-middle py-3">No hay factores de riesgo asignados.</td>
-                            <td class="text-center align-middle">
+<tr>
+<td class="align-middle text-center fw-bold">@risk.RiskNumber</td>
+<td class="align-middle cell-wide">@risk.Description</td>
+<td class="align-middle text-center">@risk.RiskClassification</td>
+<td class="align-middle text-center">@risk.ImpactGrade</td>
+<td class="align-middle text-center">@risk.OccurrenceProbability</td>
+<td class="align-middle text-center fw-bold">@risk.Quadrant</td>
+<td class="align-middle">@risk.Strategy</td>
+<td colspan="@(roleName == "Enlace" ? 12 : 16)" class="text-center text-muted align-middle py-3">No hay factores de riesgo asignados.</td>
+<td class="text-center align-middle">
                                 @if (roleName == "Coordinador" || roleName == "Superadmin")
                                 {
-                                    <div class="d-flex justify-content-center gap-2">
-                                        <a asp-controller="Ptar" asp-action="Edit" asp-route-id="@risk.RiskId" class="btn btn-sm btn-outline-primary" title="Editar">
-                                            <i class="fas fa-edit"></i>
-                                        </a>
-                                        <form asp-controller="Ptar" asp-action="Delete" asp-route-id="@risk.RiskId" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este Riesgo y todos sus factores asociados?');">
-                                            <button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
-                                                <i class="fas fa-trash-alt"></i>
-                                            </button>
-                                        </form>
-                                    </div>
+<div class="d-flex justify-content-center gap-2">
+<a asp-controller="Ptar" asp-action="Edit" asp-route-id="@risk.RiskId" class="btn btn-sm btn-outline-primary" title="Editar">
+<i class="fas fa-edit"></i>
+</a>
+<form asp-controller="Ptar" asp-action="Delete" asp-route-id="@risk.RiskId" method="post" onsubmit="return confirm('¿Estás seguro de que quieres eliminar este Riesgo y todos sus factores asociados?');">
+<button type="submit" class="btn btn-sm btn-outline-danger" title="Eliminar">
+<i class="fas fa-trash-alt"></i>
+</button>
+</form>
+</div>
                                 }
-                            </td>
-                        </tr>
+</td>
+</tr>
                     }
                 }
-            </tbody>
-        </table>
-    </div>
+</tbody>
+</table>
 </div>
-
+</div>
+ 
 <div class="floating-scrollbar" id="fakeScrollContainer"><div style="height:1px;" id="fakeScrollContent"></div></div>
 <button id="backToTopBtn" class="btn-back-to-top"><i class="fas fa-arrow-up"></i></button>
-
+ 
 @section Scripts {
-    <script>
+<script>
         document.addEventListener("DOMContentLoaded", () => {
             const tableContainer = document.getElementById("realTableContainer");
             const table = document.getElementById("mainTable");
             const fakeScrollContainer = document.getElementById("fakeScrollContainer");
             const fakeScrollContent = document.getElementById("fakeScrollContent");
             const upBtn = document.getElementById("backToTopBtn");
-
+ 
             const resizeFakeScroll = () => {
                 fakeScrollContent.style.width = `${table.scrollWidth}px`;
                 fakeScrollContainer.style.display = table.scrollWidth <= tableContainer.clientWidth ? 'none' : 'block';
             };
-
+ 
             fakeScrollContainer.addEventListener("scroll", () => tableContainer.scrollLeft = fakeScrollContainer.scrollLeft);
             tableContainer.addEventListener("scroll", () => fakeScrollContainer.scrollLeft = tableContainer.scrollLeft);
             window.addEventListener("resize", resizeFakeScroll);
             resizeFakeScroll();
-            
             window.addEventListener("scroll", () => {
                 upBtn.style.display = window.scrollY > 300 ? "flex" : "none";
             });
-
+ 
             upBtn.addEventListener("click", () => {
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
         });
-    </script>
+</script>
 }

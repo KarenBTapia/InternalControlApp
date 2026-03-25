@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using ClosedXML.Excel;
 using System.IO;
 using Rotativa.AspNetCore;
+using DocumentFormat.OpenXml.Bibliography;
 
 namespace InternalControlApp.Controllers
 {
@@ -19,22 +20,34 @@ namespace InternalControlApp.Controllers
             _logger = logger;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int? year)
         {
             var roleName = HttpContext.Session.GetString("RoleName");
             var userIdString = HttpContext.Session.GetString("UserId");
 
+            //validacion de sesion
             if (string.IsNullOrEmpty(roleName) || string.IsNullOrEmpty(userIdString))
             {
                 return RedirectToAction("Index", "Account");
             }
 
+            //variables para filtrado por año
+            int selectedYear = year ?? DateTime.Now.Year;
+            var startYearFilter = new DateOnly(selectedYear, 1, 1);
+            var endYearFilter = new DateOnly(selectedYear + 1, 1, 1);
+            var years = Enumerable.Range(DateTime.Now.Year - 5, 10).ToList();
+            ViewBag.YearList = new SelectList(years, selectedYear);
+
             if (roleName == "Coordinador" || roleName == "Superadmin")
             {
                 var allElements = await _context.ControlElementsPtcis
-                    .Include(ce => ce.ImprovementActionsPtcis)
+                    .Where(ce => ce.ImprovementActionsPtcis
+                        .Any(ia => ia.StartDate >= startYearFilter && ia.StartDate < endYearFilter))
+                    .Include(ce => ce.ImprovementActionsPtcis
+                        .Where(ia => ia.StartDate >= startYearFilter && ia.StartDate < endYearFilter))
                         .ThenInclude(ia => ia.ResponsibleUser)
-                    .Include(ce => ce.ImprovementActionsPtcis)
+                    .Include(ce => ce.ImprovementActionsPtcis
+                        .Where(ia => ia.StartDate >= startYearFilter && ia.StartDate < endYearFilter))
                         .ThenInclude(ia => ia.Unit)
                     .ToListAsync();
                 return View(allElements);
@@ -44,10 +57,19 @@ namespace InternalControlApp.Controllers
                 int.TryParse(userIdString, out int userId);
 
                 var elementsForEnlace = await _context.ControlElementsPtcis
-                    .Where(e => e.ImprovementActionsPtcis.Any(a => a.ResponsibleUserId == userId))
-                    .Include(e => e.ImprovementActionsPtcis.Where(a => a.ResponsibleUserId == userId))
+                    .Where(e => e.ImprovementActionsPtcis
+                        .Any(a => a.ResponsibleUserId == userId &&
+                                  a.StartDate >= startYearFilter &&
+                                  a.StartDate < endYearFilter))
+                    .Include(e => e.ImprovementActionsPtcis
+                        .Where(a => a.ResponsibleUserId == userId &&
+                                    a.StartDate >= startYearFilter &&
+                                    a.StartDate < endYearFilter))
                         .ThenInclude(a => a.ResponsibleUser)
-                    .Include(e => e.ImprovementActionsPtcis.Where(a => a.ResponsibleUserId == userId))
+                    .Include(e => e.ImprovementActionsPtcis
+                        .Where(a => a.ResponsibleUserId == userId &&
+                                    a.StartDate >= startYearFilter &&
+                                    a.StartDate < endYearFilter))
                         .ThenInclude(a => a.Unit)
                     .ToListAsync();
 

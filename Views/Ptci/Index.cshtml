@@ -150,11 +150,24 @@
     <a class="btn btn-custom shadow-sm" asp-controller="@homeController" asp-action="Index"><i class="fas fa-arrow-left"></i> Volver</a>
 }
 
+
+<div class="d-flex justify-content-start mb-2">
+    <form method="get" class="d-flex align-items-center gap-2">
+        <label class="fw-semibold mb-0">Filtrar por año:</label>
+
+        <select name="year"
+                asp-items="ViewBag.YearList"
+                class="form-select form-select-sm w-auto"
+                onchange="this.form.submit()">
+        </select>
+    </form>
+</div>
 <div class="card shadow-sm border-0 mb-4">
     <div class="card-header bg-white py-4 border-bottom text-center">
         <h1 class="m-0" style="color: #2c3e50; font-weight: 600; font-size: 1.75rem;">Panel de Trabajo de Control Interno (PTCI)</h1>
         <br>
     </div>
+
     <div class="table-responsive" id="realTableContainer">
         <table class="table table-hover mb-0" id="mainTable">
             <thead class="text-center align-middle">
