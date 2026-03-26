@@ -52,6 +52,7 @@
                             bool isT3Final = action.Quarter3Status == "Pendiente de Revisión" || action.Quarter3Status == "Aprobado";
                         }
 
+                        <!-- TRIMESTRE 1 -->
                         <div class="col-md-3 border-end p-3 d-flex flex-column justify-content-between">
                             <h6 class="mb-3">1er Trimestre</h6>
                             <div>
@@ -61,7 +62,20 @@
                                 }
                                 else if (action.Quarter1Status == "Borrador" || action.Quarter1Status == "Sugerencia")
                                 {
-                                    <button type="button" class="btn btn-warning w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-action-id="@action.ActionId" data-quarter="1" data-action-name="@action.ImprovementAction">@($"{action.Quarter1Grade:F0}") % (@action.Quarter1Status)</button>
+                                    <button type="button"
+                                            class="btn btn-warning w-100 mb-2 upload-btn"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#uploadModal"
+                                            data-action-id="@action.ActionId"
+                                            data-quarter="1"
+                                            data-action-name="@action.ImprovementAction"
+                                            data-q1="@(action.Quarter1Grade ?? 0)"
+                                            data-q2="@(action.Quarter2Grade ?? 0)"
+                                            data-q3="@(action.Quarter3Grade ?? 0)"
+                                            data-q4="@(action.Quarter4Grade ?? 0)">
+                                        @($"{action.Quarter1Grade:F0}") % (@action.Quarter1Status)
+                                    </button>
+
                                     <form method="post" asp-controller="Ptci" asp-action="SubmitEvidence">
                                         <input type="hidden" name="ActionId" value="@action.ActionId" />
                                         <input type="hidden" name="Quarter" value="1" />
@@ -70,12 +84,25 @@
                                 }
                                 else
                                 {
-                                    <button type="button" class="btn btn-primary w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-action-id="@action.ActionId" data-quarter="1" data-action-name="@action.ImprovementAction">Subir</button>
+                                    <button type="button"
+                                            class="btn btn-primary w-100 mb-2 upload-btn"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#uploadModal"
+                                            data-action-id="@action.ActionId"
+                                            data-quarter="1"
+                                            data-action-name="@action.ImprovementAction"
+                                            data-q1="@(action.Quarter1Grade ?? 0)"
+                                            data-q2="@(action.Quarter2Grade ?? 0)"
+                                            data-q3="@(action.Quarter3Grade ?? 0)"
+                                            data-q4="@(action.Quarter4Grade ?? 0)">
+                                        Subir
+                                    </button>
                                     <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
                                 }
                             </div>
                         </div>
 
+                        <!-- TRIMESTRE 2 -->
                         <div class="col-md-3 border-end p-3 d-flex flex-column justify-content-between">
                             <h6 class="mb-3">2do Trimestre</h6>
                             <div>
@@ -87,7 +114,20 @@
                                 {
                                     if (action.Quarter2Status == "Borrador" || action.Quarter2Status == "Sugerencia")
                                     {
-                                        <button type="button" class="btn btn-warning w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-action-id="@action.ActionId" data-quarter="2" data-action-name="@action.ImprovementAction">@($"{action.Quarter2Grade:F0}") % (@action.Quarter2Status)</button>
+                                        <button type="button"
+                                                class="btn btn-warning w-100 mb-2 upload-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#uploadModal"
+                                                data-action-id="@action.ActionId"
+                                                data-quarter="2"
+                                                data-action-name="@action.ImprovementAction"
+                                                data-q1="@(action.Quarter1Grade ?? 0)"
+                                                data-q2="@(action.Quarter2Grade ?? 0)"
+                                                data-q3="@(action.Quarter3Grade ?? 0)"
+                                                data-q4="@(action.Quarter4Grade ?? 0)">
+                                            @($"{action.Quarter2Grade:F0}") % (@action.Quarter2Status)
+                                        </button>
+
                                         <form method="post" asp-controller="Ptci" asp-action="SubmitEvidence">
                                             <input type="hidden" name="ActionId" value="@action.ActionId" />
                                             <input type="hidden" name="Quarter" value="2" />
@@ -96,7 +136,19 @@
                                     }
                                     else
                                     {
-                                        <button type="button" class="btn btn-primary w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-action-id="@action.ActionId" data-quarter="2" data-action-name="@action.ImprovementAction">Subir</button>
+                                        <button type="button"
+                                                class="btn btn-primary w-100 mb-2 upload-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#uploadModal"
+                                                data-action-id="@action.ActionId"
+                                                data-quarter="2"
+                                                data-action-name="@action.ImprovementAction"
+                                                data-q1="@(action.Quarter1Grade ?? 0)"
+                                                data-q2="@(action.Quarter2Grade ?? 0)"
+                                                data-q3="@(action.Quarter3Grade ?? 0)"
+                                                data-q4="@(action.Quarter4Grade ?? 0)">
+                                            Subir
+                                        </button>
                                         <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
                                     }
                                 }
@@ -108,6 +160,7 @@
                             </div>
                         </div>
 
+                        <!-- TRIMESTRE 3 -->
                         <div class="col-md-3 border-end p-3 d-flex flex-column justify-content-between">
                             <h6 class="mb-3">3er Trimestre</h6>
                             <div>
@@ -119,7 +172,20 @@
                                 {
                                     if (action.Quarter3Status == "Borrador" || action.Quarter3Status == "Sugerencia")
                                     {
-                                        <button type="button" class="btn btn-warning w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-action-id="@action.ActionId" data-quarter="3" data-action-name="@action.ImprovementAction">@($"{action.Quarter3Grade:F0}") % (@action.Quarter3Status)</button>
+                                        <button type="button"
+                                                class="btn btn-warning w-100 mb-2 upload-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#uploadModal"
+                                                data-action-id="@action.ActionId"
+                                                data-quarter="3"
+                                                data-action-name="@action.ImprovementAction"
+                                                data-q1="@(action.Quarter1Grade ?? 0)"
+                                                data-q2="@(action.Quarter2Grade ?? 0)"
+                                                data-q3="@(action.Quarter3Grade ?? 0)"
+                                                data-q4="@(action.Quarter4Grade ?? 0)">
+                                            @($"{action.Quarter3Grade:F0}") % (@action.Quarter3Status)
+                                        </button>
+
                                         <form method="post" asp-controller="Ptci" asp-action="SubmitEvidence">
                                             <input type="hidden" name="ActionId" value="@action.ActionId" />
                                             <input type="hidden" name="Quarter" value="3" />
@@ -128,7 +194,19 @@
                                     }
                                     else
                                     {
-                                        <button type="button" class="btn btn-primary w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-action-id="@action.ActionId" data-quarter="3" data-action-name="@action.ImprovementAction">Subir</button>
+                                        <button type="button"
+                                                class="btn btn-primary w-100 mb-2 upload-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#uploadModal"
+                                                data-action-id="@action.ActionId"
+                                                data-quarter="3"
+                                                data-action-name="@action.ImprovementAction"
+                                                data-q1="@(action.Quarter1Grade ?? 0)"
+                                                data-q2="@(action.Quarter2Grade ?? 0)"
+                                                data-q3="@(action.Quarter3Grade ?? 0)"
+                                                data-q4="@(action.Quarter4Grade ?? 0)">
+                                            Subir
+                                        </button>
                                         <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
                                     }
                                 }
@@ -140,6 +218,7 @@
                             </div>
                         </div>
 
+                        <!--TRIMESTRE 4 -->
                         <div class="col-md-3 p-3 d-flex flex-column justify-content-between">
                             <h6 class="mb-3">4to Trimestre</h6>
                             <div>
@@ -151,7 +230,20 @@
                                 {
                                     if (action.Quarter4Status == "Borrador" || action.Quarter4Status == "Sugerencia")
                                     {
-                                        <button type="button" class="btn btn-warning w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-action-id="@action.ActionId" data-quarter="4" data-action-name="@action.ImprovementAction">@($"{action.Quarter4Grade:F0}") % (@action.Quarter4Status)</button>
+                                        <button type="button"
+                                                class="btn btn-warning w-100 mb-2 upload-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#uploadModal"
+                                                data-action-id="@action.ActionId"
+                                                data-quarter="4"
+                                                data-action-name="@action.ImprovementAction"
+                                                data-q1="@(action.Quarter1Grade ?? 0)"
+                                                data-q2="@(action.Quarter2Grade ?? 0)"
+                                                data-q3="@(action.Quarter3Grade ?? 0)"
+                                                data-q4="@(action.Quarter4Grade ?? 0)">
+                                            @($"{action.Quarter4Grade:F0}") % (@action.Quarter4Status)
+                                        </button>
+
                                         <form method="post" asp-controller="Ptci" asp-action="SubmitEvidence">
                                             <input type="hidden" name="ActionId" value="@action.ActionId" />
                                             <input type="hidden" name="Quarter" value="4" />
@@ -160,7 +252,19 @@
                                     }
                                     else
                                     {
-                                        <button type="button" class="btn btn-primary w-100 mb-2 upload-btn" data-bs-toggle="modal" data-bs-target="#uploadModal" data-action-id="@action.ActionId" data-quarter="4" data-action-name="@action.ImprovementAction">Subir</button>
+                                        <button type="button"
+                                                class="btn btn-primary w-100 mb-2 upload-btn"
+                                                data-bs-toggle="modal"
+                                                data-bs-target="#uploadModal"
+                                                data-action-id="@action.ActionId"
+                                                data-quarter="4"
+                                                data-action-name="@action.ImprovementAction"
+                                                data-q1="@(action.Quarter1Grade ?? 0)"
+                                                data-q2="@(action.Quarter2Grade ?? 0)"
+                                                data-q3="@(action.Quarter3Grade ?? 0)"
+                                                data-q4="@(action.Quarter4Grade ?? 0)">
+                                            Subir
+                                        </button>
                                         <button type="button" class="btn btn-sm btn-outline-secondary w-100" disabled>Enviar Evidencia</button>
                                     }
                                 }
@@ -171,6 +275,7 @@
                                 }
                             </div>
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -241,6 +346,9 @@
         const existingFilesSection = document.getElementById('existing-files-section');
         let stagedFiles = [];
 
+        let q1 = 0, q2 = 0, q3 = 0, q4 = 0;
+        let currentQuarter = 0;
+
         function renderStagedFiles() {
             stagedFilesList.innerHTML = '';
             newFilesSection.style.display = stagedFiles.length > 0 ? 'block' : 'none';
@@ -270,6 +378,13 @@
             const quarter = button.getAttribute('data-quarter');
             const actionName = button.getAttribute('data-action-name');
 
+            q1 = parseFloat(button.getAttribute('data-q1')) || 0;
+            q2 = parseFloat(button.getAttribute('data-q2')) || 0;
+            q3 = parseFloat(button.getAttribute('data-q3')) || 0;
+            q4 = parseFloat(button.getAttribute('data-q4')) || 0;
+
+            currentQuarter = parseInt(quarter);
+
             uploadModalEl.querySelector('.modal-title').textContent = 'Subir Evidencia - ' + quarter + '° Trimestre';
             uploadModalEl.querySelector('#modalInfo').textContent = 'Estás cargando evidencia para la acción: "' + actionName + '"';
             uploadModalEl.querySelector('#modalActionId').value = actionId;
@@ -278,6 +393,13 @@
             const modalPercentageInput = uploadModalEl.querySelector('#modalPercentage');
             const modalCommentInput = uploadModalEl.querySelector('#modalComment');
             const fileInputLabel = uploadModalEl.querySelector('#file-input-label');
+
+            let values = [q1, q2, q3, q4];
+            let currentValue = values[currentQuarter - 1];
+            let totalSinActual = q1 + q2 + q3 + q4 - currentValue;
+            let restante = 100 - totalSinActual;
+
+            modalPercentageInput.max = restante;
 
             stagedFiles = [];
             renderStagedFiles();
@@ -308,6 +430,19 @@
                 });
         });
 
+        document.getElementById("modalPercentage").addEventListener("input", function () {
+            let value = parseFloat(this.value) || 0;
+            let values = [q1, q2, q3, q4];
+            values[currentQuarter - 1] = value;
+            let total = values.reduce((a, b) => a + b, 0);
+
+            if (total > 100) {
+                this.setCustomValidity("Excede el 100%");
+            } else {
+                this.setCustomValidity("");
+            }
+        });
+
         uploadForm.addEventListener('submit', function(event) {
             event.preventDefault();
             document.getElementById("percentageError").textContent = "";
@@ -320,8 +455,18 @@
             if (percentageValue === "") {
                 document.getElementById("percentageError").textContent = "El porcentaje es obligatorio.";
                 hasError = true;
-            } else if (parseInt(percentageValue) === 0) {
+            } else if (parseFloat(percentageValue) <= 0) {
                 document.getElementById("percentageError").textContent = "El porcentaje debe ser mayor a 0.";
+                hasError = true;
+            }
+
+            let percentage = parseFloat(percentageValue) || 0;
+            let values = [q1, q2, q3, q4];
+            values[currentQuarter - 1] = percentage;
+            let total = values.reduce((a, b) => a + b, 0);
+
+            if (total > 100) {
+                document.getElementById("percentageError").textContent = "La suma total entre los 4  los trimestres no puede exceder el 100%.";
                 hasError = true;
             }
 
@@ -337,7 +482,7 @@
 
             const submitButton = uploadForm.querySelector('button[type="submit"]');
             submitButton.disabled = true;
-            submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Guardando...`;
+            submitButton.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> Guardando...`;
 
             fetch('/Ptci/SaveDraft', {
                 method: 'POST',
@@ -352,14 +497,18 @@
                     window.location.reload();
                     return;
                 }
-                if (data.field === "percentage") document.getElementById("percentageError").textContent = data.message;
-                else if (data.field === "files") document.getElementById("filesError").textContent = data.message;
-                else alert(data.message || "Ocurrió un error.");
+
+                if (data.field === "percentage")
+                    document.getElementById("percentageError").textContent = data.message;
+                else if (data.field === "files")
+                    document.getElementById("filesError").textContent = data.message;
+                else
+                    alert(data.message || "Ocurrió un error.");
 
                 submitButton.disabled = false;
                 submitButton.textContent = "Guardar Borrador";
             })
-            .catch(error => {
+            .catch(() => {
                 alert("Problema de red.");
                 submitButton.disabled = false;
                 submitButton.textContent = "Guardar Borrador";
@@ -368,7 +517,9 @@
 
         function deleteAttachment(buttonElement, attachmentId) {
             if (!confirm('¿Estás seguro de que quieres eliminar este archivo permanentemente?')) return;
+
             const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
+
             fetch('/Ptci/DeleteAttachment', {
                 method: 'POST',
                 body: JSON.stringify({ attachmentId: attachmentId }),
@@ -382,7 +533,7 @@
                 if (data.success) buttonElement.closest('li').remove();
                 else alert('Error al eliminar el archivo: ' + data.message);
             })
-            .catch(error => alert('Ocurrió un error de red.'));
+            .catch(() => alert('Ocurrió un error de red.'));
         }
     </script>
 }
